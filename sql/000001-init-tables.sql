@@ -18,10 +18,13 @@ CREATE TABLE IF NOT EXISTS team_member (
 );
 
 CREATE TABLE IF NOT EXISTS pull_request (
-    id        VARCHAR(36) PRIMARY KEY,
-    pr_name   VARCHAR(128) NOT NULL,
-    author_id VARCHAR(36) REFERENCES team_member(id) ON DELETE NO ACTION NOT NULL,
-    pr_status VARCHAR(16) NOT NULL DEFAULT 'OPEN'
+    id         VARCHAR(36) PRIMARY KEY,
+    pr_name    VARCHAR(128) NOT NULL,
+    author_id  VARCHAR(36) REFERENCES team_member(id) ON DELETE NO ACTION NOT NULL,
+    pr_status  VARCHAR(16) NOT NULL DEFAULT 'OPEN',
+
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    merged_at  TIMESTAMP WITHOUT TIME ZONE
 );
 
 CREATE TABLE IF NOT EXISTS assigned_reviewers (
