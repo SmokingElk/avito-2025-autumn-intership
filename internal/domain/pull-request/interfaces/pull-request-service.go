@@ -7,7 +7,7 @@ import (
 )
 
 type PullRequestService interface {
-	GetByReviewer(ctx context.Context, reviewerId string) error
+	GetByReviewer(ctx context.Context, reviewerId string) ([]prEntity.PullRequest, error)
 	Create(ctx context.Context, prId, prName, authorId string) (prEntity.PullRequest, error)
 	Merge(ctx context.Context, prId string) error
 	Reassign(ctx context.Context, prId string, oldReviewerId string) (prEntity.PullRequest, string, error)
