@@ -23,6 +23,20 @@ definitions:
       team_name:
         type: string
     type: object
+  docs.CreatePRRequest:
+    properties:
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+    type: object
+  docs.CreatePRResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/docs.PRResponseObject'
+    type: object
   docs.ErrorResponse:
     properties:
       code:
@@ -59,6 +73,62 @@ definitions:
       team_name:
         type: string
     type: object
+  docs.MergePRRequest:
+    properties:
+      pull_request_id:
+        type: string
+    type: object
+  docs.MergePRResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/docs.MergePRResponseObject'
+    type: object
+  docs.MergePRResponseObject:
+    properties:
+      assigned_reviewers:
+        items:
+          type: string
+        type: array
+      author_id:
+        type: string
+      mergedAt:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.PRResponseObject:
+    properties:
+      assigned_reviewers:
+        items:
+          type: string
+        type: array
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.ReassignRequest:
+    properties:
+      old_reviewer_id:
+        type: string
+      pull_request_id:
+        type: string
+    type: object
+  docs.ReassignResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/docs.PRResponseObject'
+      replaced_by:
+        type: string
+    type: object
   docs.SetIsActiveRequest:
     properties:
       is_active:
@@ -93,6 +163,95 @@ info:
   title: PR Reviewer Assignment Service (Test Task, Fall 2025)
   version: 1.0.0
 paths:
+  /pullRequest/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для создания
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreatePRRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: PR создан
+          schema:
+            $ref: '#/definitions/docs.CreatePRResponse'
+        "404":
+          description: Автор/команда не найдены
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "409":
+          description: PR уже существует
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создать PR и автоматически назначить до 2 ревьюверов из команды авторы
+      tags:
+      - PullRequests
+  /pullRequest/merge:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Идентификатор PR
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.MergePRRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PR в состоянии MERGED
+          schema:
+            $ref: '#/definitions/docs.MergePRResponse'
+        "404":
+          description: PR не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Пометить PR как MERGED (идемпотентная операция)
+      tags:
+      - PullRequests
+  /pullRequest/reassign:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для переназначения
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.ReassignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Переназначение выполнено
+          schema:
+            $ref: '#/definitions/docs.ReassignResponse'
+        "404":
+          description: PR или пользователь найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "409":
+          description: Нарушение доменных правил переназначения
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Переназначить конкретного ревьювера на другого из его команды
+      tags:
+      - PullRequests
   /team/add:
     post:
       consumes:

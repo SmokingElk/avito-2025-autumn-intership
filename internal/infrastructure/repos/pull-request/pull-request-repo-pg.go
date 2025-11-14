@@ -13,7 +13,10 @@ import (
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/interfaces"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/pull-request/dto"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
+
+const primaryKeyViolation = "23505"
 
 type PullRequestRepoPg struct {
 	db *sqlx.DB
@@ -104,6 +107,12 @@ func (r *PullRequestRepoPg) Create(
 		string(pr.Status),
 		pr.CreatedAt,
 	); err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == primaryKeyViolation {
+				return prEntity.PullRequest{}, prErrors.ErrAlreadyExists
+			}
+		}
+
 		return prEntity.PullRequest{}, fmt.Errorf("failed to create pr in postgres: %w", err)
 	}
 
@@ -269,7 +278,7 @@ func (r *PullRequestRepoPg) Reassign(
 		teamMembersEntities = append(teamMembersEntities, member.ToMemberEntity())
 	}
 
-	newReviewer, err := assign(pr.AuthorId, pr.Reviewers, teamMembersEntities)
+	newReviewer, err := assign(pr.AuthorId, pr.ToPullRequestEntity(), teamMembersEntities)
 
 	if err != nil {
 		return prEntity.PullRequest{}, "", err

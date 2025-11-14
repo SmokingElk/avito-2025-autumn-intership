@@ -9,7 +9,7 @@ import (
 
 // extract assign logic from infrastructure layer
 type AssignHandler func(authorId string, members []memberEntity.Member) []string
-type ReassignHandler func(authorId string, currentReviewers []string, teamMembers []memberEntity.Member) (string, error)
+type ReassignHandler func(authorId string, pr prEntity.PullRequest, teamMembers []memberEntity.Member) (string, error)
 
 type PullRequestRepo interface {
 	GetByReviewer(ctx context.Context, reviewerId string, limit int) ([]prEntity.PullRequest, error)

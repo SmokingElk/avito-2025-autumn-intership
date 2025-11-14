@@ -50,7 +50,7 @@ func (h *TeamHandlers) Add(ctx *gin.Context) {
 
 	membersEntities := make([]memberEntity.Member, 0, len(request.Members))
 
-	err := h.teamService.Upsert(ctx, request.Name, membersEntities)
+	err := h.teamService.Upsert(ctx.Request.Context(), request.Name, membersEntities)
 
 	if err != nil {
 		switch {
@@ -108,7 +108,7 @@ func (h *TeamHandlers) Get(ctx *gin.Context) {
 		return
 	}
 
-	team, err := h.teamService.GetByName(ctx, teamName)
+	team, err := h.teamService.GetByName(ctx.Request.Context(), teamName)
 
 	if err != nil {
 		switch {

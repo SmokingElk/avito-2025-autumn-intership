@@ -15,6 +15,150 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/pullRequest/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PullRequests"
+                ],
+                "summary": "Создать PR и автоматически назначить до 2 ревьюверов из команды авторы",
+                "parameters": [
+                    {
+                        "description": "Данные для создания",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreatePRRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "PR создан",
+                        "schema": {
+                            "$ref": "#/definitions/docs.CreatePRResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Автор/команда не найдены",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "PR уже существует",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/pullRequest/merge": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PullRequests"
+                ],
+                "summary": "Пометить PR как MERGED (идемпотентная операция)",
+                "parameters": [
+                    {
+                        "description": "Идентификатор PR",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.MergePRRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PR в состоянии MERGED",
+                        "schema": {
+                            "$ref": "#/definitions/docs.MergePRResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "PR не найден",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/pullRequest/reassign": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PullRequests"
+                ],
+                "summary": "Переназначить конкретного ревьювера на другого из его команды",
+                "parameters": [
+                    {
+                        "description": "Данные для переназначения",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.ReassignRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Переназначение выполнено",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ReassignResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "PR или пользователь найден",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Нарушение доменных правил переназначения",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/team/add": {
             "post": {
                 "consumes": [
@@ -214,6 +358,28 @@ const docTemplate = `{
                 }
             }
         },
+        "docs.CreatePRRequest": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "pull_request_id": {
+                    "type": "string"
+                },
+                "pull_request_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.CreatePRResponse": {
+            "type": "object",
+            "properties": {
+                "pr": {
+                    "$ref": "#/definitions/docs.PRResponseObject"
+                }
+            }
+        },
         "docs.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -266,6 +432,93 @@ const docTemplate = `{
                     }
                 },
                 "team_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.MergePRRequest": {
+            "type": "object",
+            "properties": {
+                "pull_request_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.MergePRResponse": {
+            "type": "object",
+            "properties": {
+                "pr": {
+                    "$ref": "#/definitions/docs.MergePRResponseObject"
+                }
+            }
+        },
+        "docs.MergePRResponseObject": {
+            "type": "object",
+            "properties": {
+                "assigned_reviewers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "author_id": {
+                    "type": "string"
+                },
+                "mergedAt": {
+                    "type": "string"
+                },
+                "pull_request_id": {
+                    "type": "string"
+                },
+                "pull_request_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.PRResponseObject": {
+            "type": "object",
+            "properties": {
+                "assigned_reviewers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "author_id": {
+                    "type": "string"
+                },
+                "pull_request_id": {
+                    "type": "string"
+                },
+                "pull_request_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.ReassignRequest": {
+            "type": "object",
+            "properties": {
+                "old_reviewer_id": {
+                    "type": "string"
+                },
+                "pull_request_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.ReassignResponse": {
+            "type": "object",
+            "properties": {
+                "pr": {
+                    "$ref": "#/definitions/docs.PRResponseObject"
+                },
+                "replaced_by": {
                     "type": "string"
                 }
             }
