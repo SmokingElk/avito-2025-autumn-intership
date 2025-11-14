@@ -81,7 +81,7 @@ func (r *TeamRepoPg) Upsert(ctx context.Context, team teamEntity.Team, matcher i
 		UPDATE member SET team_id = $4 WHERE id = $1
 		`
 
-		if _, err = tx.ExecContext(ctx, query, member.Id, member.Username, string(member.Username), team.Id); err != nil {
+		if _, err = tx.ExecContext(ctx, query, member.Id, member.Username, string(member.Activity), team.Id); err != nil {
 			return fmt.Errorf("failed to upsert member of team into postgres table: %w", err)
 		}
 

@@ -16,7 +16,7 @@ type MemberRepoPg struct {
 	db *sqlx.DB
 }
 
-func NewMemberRepoPg(db *sqlx.DB) interfaces.MemberRepo {
+func CreateMemberRepoPg(db *sqlx.DB) interfaces.MemberRepo {
 	return &MemberRepoPg{
 		db: db,
 	}
