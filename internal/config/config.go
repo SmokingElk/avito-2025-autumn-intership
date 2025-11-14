@@ -10,8 +10,9 @@ import (
 type Config struct {
 	Env string `yaml:"env" env-required:"true"`
 
-	RestConfig     `yaml:"rest" env-required:"true"`
-	PostgresConfig `yaml:"postgres" env-required:"true"`
+	RestConfig        `yaml:"rest" env-required:"true"`
+	PostgresConfig    `yaml:"postgres" env-required:"true"`
+	PullRequestConfig `yaml:"pull_request" env-required:"true"`
 }
 
 type RestConfig struct {
@@ -25,6 +26,11 @@ type PostgresConfig struct {
 	Host     string `yaml:"host" env-required:"true"`
 	Port     int    `yaml:"port" env-required:"true"`
 	Database string `yaml:"database" env-required:"true"`
+}
+
+type PullRequestConfig struct {
+	OutLimit             int `yaml:"out_limit" env-required:"true"`
+	TargetReviewersCount int `yaml:"target_reviewers_count" env-required:"true"`
 }
 
 func MustLoadConfig() *Config {
