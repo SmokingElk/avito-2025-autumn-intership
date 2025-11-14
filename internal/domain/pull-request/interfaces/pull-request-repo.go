@@ -10,11 +10,16 @@ import (
 // extract assign logic from infrastructure layer
 type AssignHandler func(authorId string, members []memberEntity.Member) []string
 type ReassignHandler func(authorId string, pr prEntity.PullRequest, teamMembers []memberEntity.Member) (string, error)
+type UpdateStatusHandler func(pr prEntity.PullRequest) (prEntity.PullRequest, bool)
 
 type PullRequestRepo interface {
 	GetByReviewer(ctx context.Context, reviewerId string, limit int) ([]prEntity.PullRequest, error)
 	Create(ctx context.Context, pr prEntity.PullRequest, assign AssignHandler) (prEntity.PullRequest, error)
-	Merge(ctx context.Context, prId string) (prEntity.PullRequest, error)
+	UpdateStatus(
+		ctx context.Context,
+		prId string,
+		updateStatusHandler UpdateStatusHandler,
+	) (prEntity.PullRequest, error)
 	Reassign(
 		ctx context.Context,
 		prId string,

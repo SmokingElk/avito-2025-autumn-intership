@@ -90,6 +90,7 @@ func (h *MemberHandlers) SetIsActive(ctx *gin.Context) {
 // @Param user_id query string true "Идентификатор пользователя"
 // @Produce json
 // @Success 200 {object} docs.GetReviewResponse "Список PR'ов пользователя"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Router /users/getReview [get]
 func (h *MemberHandlers) GetReview(ctx *gin.Context) {
 	log := h.localLogger(ctx, "GetReview")

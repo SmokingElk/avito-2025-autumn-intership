@@ -34,8 +34,10 @@ func CreateTeamHandlers(teamService interfaces.TeamService, log zerolog.Logger) 
 // @Accept json
 // @Produce json
 // @Param input body docs.AddTeamRequest true "Данные для создания/обновления"
-// @Success 201 {object} docs.AddTeamResponse "Обновленный пользователь"
+// @Success 201 {object} docs.AddTeamResponse "Команда создана"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 400 {object} docs.ErrorResponse "Команда уже существует"
+// @Failure 409 {object} docs.ErrorResponse "Пользователь является членом другой команды"
 // @Router /team/add [post]
 func (h *TeamHandlers) Add(ctx *gin.Context) {
 	log := h.localLogger(ctx, "Add")
@@ -50,22 +52,26 @@ func (h *TeamHandlers) Add(ctx *gin.Context) {
 
 	membersEntities := make([]memberEntity.Member, 0, len(request.Members))
 
+	for _, member := range request.Members {
+		membersEntities = append(membersEntities, member.ToTeamMemberEntity())
+	}
+
 	err := h.teamService.Upsert(ctx.Request.Context(), request.Name, membersEntities)
 
 	if err != nil {
 		switch {
-		case errors.Is(err, teamErrors.ErrMemberOfOtherTeam):
-			log.Warn().Msg("member of other team")
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
-				"MEMBER_OF_OTHER_TEAM",
-				"User is member of other team",
-			))
-
 		case errors.Is(err, teamErrors.ErrTeamExists):
 			log.Warn().Msg("team already exists")
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
 				"TEAM_EXISTS",
 				"team_name already exists",
+			))
+
+		case errors.Is(err, teamErrors.ErrMemberOfOtherTeam):
+			log.Warn().Msg("member of other team")
+			ctx.AbortWithStatusJSON(http.StatusConflict, docs.NewErrorResponse(
+				"MEMBER_OF_OTHER_TEAM",
+				"User is member of other team",
 			))
 
 		default:
@@ -95,6 +101,7 @@ func (h *TeamHandlers) Add(ctx *gin.Context) {
 // @Param team_name query string true "Уникальное имя команды"
 // @Produce json
 // @Success 200 {object} docs.GetTeamResponse "Объект команды"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 404 {object} docs.ErrorResponse "Команда не найдена"
 // @Router /team/get [get]
 func (h *TeamHandlers) Get(ctx *gin.Context) {
@@ -126,6 +133,8 @@ func (h *TeamHandlers) Get(ctx *gin.Context) {
 				fmt.Sprintf("failed to get team: %s", err.Error()),
 			))
 		}
+
+		return
 	}
 
 	resp := docs.GetTeamResponse{

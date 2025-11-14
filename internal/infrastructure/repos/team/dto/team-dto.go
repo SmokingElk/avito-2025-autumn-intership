@@ -23,7 +23,7 @@ func (m MemberDTO) ToMemberEntity() memberEntity.Member {
 
 type TeamDTO struct {
 	Id      string `db:"id"`
-	Name    string `db:"name"`
+	Name    string `db:"team_name"`
 	Members []MemberDTO
 }
 

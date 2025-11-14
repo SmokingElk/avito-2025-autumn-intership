@@ -43,8 +43,8 @@ func (r *MemberRepoPg) SetActivity(
 	var member dto.MemberDTO
 
 	query := `
-	SELECT m.id, m.username, m.activity, t.name as team_name
-	FROM member AS m
+	SELECT m.id, m.username, m.activity, t.team_name
+	FROM team_member AS m
 	LEFT JOIN team AS t
 		ON m.team_id = t.id
 	WHERE m.id = $1
@@ -58,7 +58,7 @@ func (r *MemberRepoPg) SetActivity(
 		return memberEntity.Member{}, fmt.Errorf("failed to get member in postgres: %w", err)
 	}
 
-	query = "UPDATE member SET activity = $1 WHERE id = $2"
+	query = "UPDATE team_member SET activity = $1 WHERE id = $2"
 	_, err = tx.ExecContext(ctx, query, string(activity), userId)
 
 	if err != nil {

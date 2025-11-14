@@ -35,6 +35,7 @@ func CreatePullRequestHandlers(pullRequestService interfaces.PullRequestService,
 // @Produce json
 // @Param input body docs.CreatePRRequest true "Данные для создания"
 // @Success 201 {object} docs.CreatePRResponse "PR создан"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 404 {object} docs.ErrorResponse "Автор/команда не найдены"
 // @Failure 409 {object} docs.ErrorResponse "PR уже существует"
 // @Router /pullRequest/create [post]
@@ -62,7 +63,7 @@ func (h *PullRequestHandlers) Create(ctx *gin.Context) {
 
 		case errors.Is(err, prErrors.ErrAlreadyExists):
 			log.Warn().Msg("pr already exists")
-			ctx.AbortWithStatusJSON(http.StatusNotFound, docs.NewErrorResponse(
+			ctx.AbortWithStatusJSON(http.StatusConflict, docs.NewErrorResponse(
 				"PR_EXISTS",
 				"PR id already exists",
 			))
@@ -101,6 +102,7 @@ func (h *PullRequestHandlers) Create(ctx *gin.Context) {
 // @Produce json
 // @Param input body docs.MergePRRequest true "Идентификатор PR"
 // @Success 200 {object} docs.MergePRResponse "PR в состоянии MERGED"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 404 {object} docs.ErrorResponse "PR не найден"
 // @Router /pullRequest/merge [post]
 func (h *PullRequestHandlers) Merge(ctx *gin.Context) {
@@ -160,6 +162,7 @@ func (h *PullRequestHandlers) Merge(ctx *gin.Context) {
 // @Produce json
 // @Param input body docs.ReassignRequest true "Данные для переназначения"
 // @Success 200 {object} docs.ReassignResponse "Переназначение выполнено"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 404 {object} docs.ErrorResponse "PR или пользователь найден"
 // @Failure 409 {object} docs.ErrorResponse "Нарушение доменных правил переназначения"
 // @Router /pullRequest/reassign [post]
@@ -180,6 +183,13 @@ func (h *PullRequestHandlers) Reassign(ctx *gin.Context) {
 		switch {
 		case errors.Is(err, prErrors.ErrNotFound):
 			log.Warn().Msg("pr not found")
+			ctx.AbortWithStatusJSON(http.StatusNotFound, docs.NewErrorResponse(
+				"NOT_FOUND",
+				"resource not found",
+			))
+
+		case errors.Is(err, prErrors.ErrTeamOrUserNotFound):
+			log.Warn().Msg("team or user not found")
 			ctx.AbortWithStatusJSON(http.StatusNotFound, docs.NewErrorResponse(
 				"NOT_FOUND",
 				"resource not found",

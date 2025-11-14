@@ -181,6 +181,10 @@ paths:
           description: PR создан
           schema:
             $ref: '#/definitions/docs.CreatePRResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
         "404":
           description: Автор/команда не найдены
           schema:
@@ -212,6 +216,10 @@ paths:
           description: PR в состоянии MERGED
           schema:
             $ref: '#/definitions/docs.MergePRResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
         "404":
           description: PR не найден
           schema:
@@ -239,6 +247,10 @@ paths:
           description: Переназначение выполнено
           schema:
             $ref: '#/definitions/docs.ReassignResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
         "404":
           description: PR или пользователь найден
           schema:
@@ -267,11 +279,19 @@ paths:
       - application/json
       responses:
         "201":
-          description: Обновленный пользователь
+          description: Команда создана
           schema:
             $ref: '#/definitions/docs.AddTeamResponse'
         "400":
           description: Команда уже существует
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "409":
+          description: Пользователь является членом другой команды
           schema:
             $ref: '#/definitions/docs.ErrorResponse'
       summary: Создать команду с участниками (создает/обновляет пользователей)
@@ -292,6 +312,10 @@ paths:
           description: Объект команды
           schema:
             $ref: '#/definitions/docs.GetTeamResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
         "404":
           description: Команда не найдена
           schema:
@@ -316,6 +340,10 @@ paths:
           description: Список PR'ов пользователя
           schema:
             $ref: '#/definitions/docs.GetReviewResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Получить PR'ы, где пользователь установлен ревьювером

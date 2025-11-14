@@ -1,0 +1,15 @@
+env: develop
+
+rest:
+  port: 8080
+  allow_origin: http://localhost:8080
+
+postgres:
+  user: Admin
+  host: pr-svc_postgres
+  port: 5432
+  database: pr-service
+  
+pull_request:
+  out_limit: 100
+  target_reviewers_count: 2

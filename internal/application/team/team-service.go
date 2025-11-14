@@ -30,6 +30,10 @@ func (s *TeamService) Upsert(ctx context.Context, name string, membersList []mem
 	}
 
 	err := s.repo.Upsert(ctx, team, func(currentTeam teamEntity.Team) bool {
+		if len(newMembers) != len(currentTeam.Members) {
+			return false
+		}
+
 		for _, member := range currentTeam.Members {
 			if _, ok := newMembers[member.Id]; !ok {
 				return false
