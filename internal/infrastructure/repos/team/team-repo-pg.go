@@ -40,7 +40,7 @@ func (r *TeamRepoPg) Upsert(ctx context.Context, team teamEntity.Team, matcher i
 	currentTeam, err := r.getTeamWithMembers(ctx, tx, team.Name)
 
 	if err != nil {
-		if err != teamErrors.ErrTeamNotFound {
+		if !errors.Is(err, teamErrors.ErrTeamNotFound) {
 			return err
 		}
 
@@ -49,14 +49,16 @@ func (r *TeamRepoPg) Upsert(ctx context.Context, team teamEntity.Team, matcher i
 		team.Id = currentTeam.Id
 	}
 
-	if matcher(currentTeam) {
+	err = nil
+
+	if updateTeam && matcher(currentTeam) {
 		err = teamErrors.ErrTeamExists
 		return err
 	}
 
 	query := `
-	INSERT INTO team(id, name) VALUES ($1, $2) 
-	ON CONFLICT (id, name) 
+	INSERT INTO team(id, team_name) VALUES ($1, $2) 
+	ON CONFLICT
 	DO NOTHING
 	`
 
@@ -68,17 +70,28 @@ func (r *TeamRepoPg) Upsert(ctx context.Context, team teamEntity.Team, matcher i
 
 	// upsert new members if they are not members of other team
 	for _, member := range team.Members {
-		query = `SELECT id FROM member WHERE id = $1 AND team_id IS NOT NULL`
+		var m dto.MemberDTO
 
-		if _, err = tx.ExecContext(ctx, query, member.Id); err == nil {
+		query = `
+		SELECT m.id 
+		FROM team_member as m
+		INNER JOIN team as t 
+			ON t.id = m.team_id 
+		WHERE m.id = $1 AND t.team_name <> $2
+		`
+
+		if err = tx.GetContext(ctx, &m, query, member.Id, team.Name); err == nil {
 			err = teamErrors.ErrMemberOfOtherTeam
 			return err
+		} else if !errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("failed to check if member in other team: %w", err)
 		}
 
 		query := `
-		INSERT INTO member(id, username, activity, team_id) VALUES ($1, $2, $3, $4) 
-		ON CONFLICT DO 
-		UPDATE member SET team_id = $4 WHERE id = $1
+		INSERT INTO team_member(id, username, activity, team_id) VALUES ($1, $2, $3, $4) 
+		ON CONFLICT(id) DO UPDATE 
+		SET team_id = EXCLUDED.team_id
+		WHERE team_member.id = EXCLUDED.id
 		`
 
 		if _, err = tx.ExecContext(ctx, query, member.Id, member.Username, string(member.Activity), team.Id); err != nil {
@@ -97,18 +110,18 @@ func (r *TeamRepoPg) Upsert(ctx context.Context, team teamEntity.Team, matcher i
 
 			// delete member from reviewers of opened PR
 			query = `
-			DELETE a 
-			FROM assigned_reviewers AS a
-			INNER JOIN pull_request AS pr 
-				ON a.pr_id = pr.id
-			WHERE pr.status = 'OPEN' AND a.member_id = $1
+			DELETE FROM assigned_reviewer 
+			USING pull_request AS pr
+			WHERE assigned_reviewer.pr_id = pr.id 
+				AND pr.pr_status = 'OPEN' 
+				AND assigned_reviewer.member_id = $1
 			`
 
 			if _, err = tx.ExecContext(ctx, query, oldMember.Id); err != nil {
 				return fmt.Errorf("failed to remove member from reviewers: %w", err)
 			}
 
-			query = "UPDATE member SET team_id = NULL WHERE id = $1"
+			query = "UPDATE team_member SET team_id = NULL WHERE id = $1"
 
 			if _, err = tx.ExecContext(ctx, query, oldMember.Id); err != nil {
 				return fmt.Errorf("failed to remove member from team members: %w", err)
@@ -150,7 +163,7 @@ func (r *TeamRepoPg) GetByName(ctx context.Context, name string) (teamEntity.Tea
 }
 
 func (r *TeamRepoPg) getTeamWithMembers(ctx context.Context, tx *sqlx.Tx, name string) (teamEntity.Team, error) {
-	query := "SELECT id, name FROM team WHERE name = $1"
+	query := "SELECT id, team_name FROM team WHERE team_name = $1"
 
 	var team dto.TeamDTO
 	if err := tx.GetContext(ctx, &team, query, name); err != nil {
@@ -161,7 +174,7 @@ func (r *TeamRepoPg) getTeamWithMembers(ctx context.Context, tx *sqlx.Tx, name s
 		return teamEntity.Team{}, fmt.Errorf("failed to select team from postgres table: %w", err)
 	}
 
-	query = "SELECT id, name, activity, team_id FROM member WHERE team_id = $1"
+	query = "SELECT id, username, activity, team_id FROM team_member WHERE team_id = $1"
 
 	if err := tx.SelectContext(ctx, &team.Members, query, team.Id); err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {

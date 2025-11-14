@@ -8,6 +8,8 @@ services:
       timeout: 5s
       retries: 3
     hostname: pr-svc_postgres
+    ports:
+      - 5432:5432
     networks:
       - pr-svc_network
     volumes:
@@ -17,6 +19,27 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+
+  backend-app:
+    container_name: pr-svc_backend-app
+    image: pr-svc_backend-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    networks:
+      - pr-svc_network
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./config:/root/config:ro
+    env_file:
+      - .env
 
 networks:
   pr-svc_network:

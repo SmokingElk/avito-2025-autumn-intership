@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	memberEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/entity"
 	prEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/entity"
@@ -43,9 +42,9 @@ func (r *PullRequestRepoPg) GetByReviewer(ctx context.Context, reviewerId string
 	LIMIT $2
 	`
 
-	var res []dto.PullRequestDTO
+	var prs []dto.PullRequestDTO
 
-	if err := r.db.SelectContext(ctx, &res, query, reviewerId, limit); err != nil {
+	if err := r.db.SelectContext(ctx, &prs, query, reviewerId, limit); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return []prEntity.PullRequest{}, nil
 		}
@@ -53,7 +52,13 @@ func (r *PullRequestRepoPg) GetByReviewer(ctx context.Context, reviewerId string
 		return []prEntity.PullRequest{}, fmt.Errorf("failed to select PRs by reviewer: %w", err)
 	}
 
-	return []prEntity.PullRequest{}, nil
+	res := make([]prEntity.PullRequest, 0, len(prs))
+
+	for _, pr := range prs {
+		res = append(res, pr.ToPullRequestEntity())
+	}
+
+	return res, nil
 }
 
 func (r *PullRequestRepoPg) Create(
@@ -74,12 +79,12 @@ func (r *PullRequestRepoPg) Create(
 	}()
 
 	var team struct {
-		id *string `db:"team_id"`
+		Id *string `db:"team_id"`
 	}
 
-	query := "SELECT team_id FROM member WHERE id = $1"
+	query := "SELECT team_id FROM team_member WHERE id = $1"
 
-	if err = tx.GetContext(ctx, &team, query, pr.Id); err != nil {
+	if err = tx.GetContext(ctx, &team, query, pr.AuthorId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return prEntity.PullRequest{}, prErrors.ErrTeamOrUserNotFound
 		}
@@ -87,7 +92,7 @@ func (r *PullRequestRepoPg) Create(
 		return prEntity.PullRequest{}, fmt.Errorf("failed to get team while create pr: %w", err)
 	}
 
-	if team.id == nil {
+	if team.Id == nil {
 		err = prErrors.ErrTeamOrUserNotFound
 		return prEntity.PullRequest{}, err
 	}
@@ -103,7 +108,7 @@ func (r *PullRequestRepoPg) Create(
 		pr.Id,
 		pr.Name,
 		pr.AuthorId,
-		team.id,
+		team.Id,
 		string(pr.Status),
 		pr.CreatedAt,
 	); err != nil {
@@ -118,9 +123,9 @@ func (r *PullRequestRepoPg) Create(
 
 	var members []dto.MemberDTO
 
-	query = "SELECT id, activity FROM member WHERE team_id = $1"
+	query = "SELECT id, activity FROM team_member WHERE team_id = $1"
 
-	if err = tx.SelectContext(ctx, &members, query, team.id); err != nil {
+	if err = tx.SelectContext(ctx, &members, query, team.Id); err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return prEntity.PullRequest{}, fmt.Errorf("failed to get team members while create pr")
 		}
@@ -154,7 +159,11 @@ func (r *PullRequestRepoPg) Create(
 	return pr, nil
 }
 
-func (r *PullRequestRepoPg) Merge(ctx context.Context, prId string) (prEntity.PullRequest, error) {
+func (r *PullRequestRepoPg) UpdateStatus(
+	ctx context.Context,
+	prId string,
+	updateStatusHandler interfaces.UpdateStatusHandler,
+) (prEntity.PullRequest, error) {
 	tx, err := r.db.Beginx()
 
 	if err != nil {
@@ -189,32 +198,26 @@ func (r *PullRequestRepoPg) Merge(ctx context.Context, prId string) (prEntity.Pu
 		return prEntity.PullRequest{}, fmt.Errorf("failed to get pr while merge: %w", err)
 	}
 
-	if prEntity.PRStatus(pr.Status) == prEntity.PRMerged {
-		if err = tx.Commit(); err != nil {
-			return prEntity.PullRequest{}, fmt.Errorf("failed to commit tx while merge pr postgres: %w", err)
+	pr.Id = prId
+	prUpdated, updated := updateStatusHandler(pr.ToPullRequestEntity())
+
+	if updated {
+		query = `
+		UPDATE pull_request
+		SET pr_status = $1, merged_at = $2 
+		WHERE id = $3
+		`
+
+		if _, err = tx.ExecContext(ctx, query, string(prUpdated.Status), prUpdated.MergedAt, prId); err != nil {
+			return prEntity.PullRequest{}, fmt.Errorf("failed to update status while merge mr: %w", err)
 		}
-
-		return pr.ToPullRequestEntity(), nil
-	}
-
-	pr.MergedAt = time.Now()
-
-	query = `
-	UPDATE pull_request
-	SET status = 'MERGED', merged_at = $1 
-	WHERE id = $2
-	`
-
-	if _, err = tx.ExecContext(ctx, query, pr.MergedAt, prId); err != nil {
-		return prEntity.PullRequest{}, fmt.Errorf("failed to update status while merge mr: %w", err)
 	}
 
 	if err = tx.Commit(); err != nil {
 		return prEntity.PullRequest{}, fmt.Errorf("failed to commit tx while merge pr postgres: %w", err)
 	}
 
-	pr.Id = prId
-	return pr.ToPullRequestEntity(), nil
+	return prUpdated, nil
 }
 
 func (r *PullRequestRepoPg) Reassign(
@@ -244,6 +247,7 @@ func (r *PullRequestRepoPg) Reassign(
 		pr_status,
 		created_at,
 		merged_at,
+		team_id,
 		reviewers
 	FROM pr_with_members WHERE id = $1
 	`
@@ -262,7 +266,7 @@ func (r *PullRequestRepoPg) Reassign(
 
 	query = `
 	SELECT id, activity 
-	FROM members 
+	FROM team_member 
 	WHERE team_id = $1
 	`
 
@@ -306,5 +310,5 @@ func (r *PullRequestRepoPg) Reassign(
 		}
 	}
 
-	return prEntity.PullRequest{}, newReviewer, nil
+	return pr.ToPullRequestEntity(), newReviewer, nil
 }

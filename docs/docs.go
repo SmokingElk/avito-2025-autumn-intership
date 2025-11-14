@@ -50,6 +50,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/docs.CreatePRResponse"
                         }
                     },
+                    "401": {
+                        "description": "Нет/неверный админский токен",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Автор/команда не найдены",
                         "schema": {
@@ -100,6 +106,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/docs.MergePRResponse"
                         }
                     },
+                    "401": {
+                        "description": "Нет/неверный админский токен",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "PR не найден",
                         "schema": {
@@ -144,6 +156,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/docs.ReassignResponse"
                         }
                     },
+                    "401": {
+                        "description": "Нет/неверный админский токен",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "PR или пользователь найден",
                         "schema": {
@@ -184,13 +202,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Обновленный пользователь",
+                        "description": "Команда создана",
                         "schema": {
                             "$ref": "#/definitions/docs.AddTeamResponse"
                         }
                     },
                     "400": {
                         "description": "Команда уже существует",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет/неверный админский токен",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Пользователь является членом другой команды",
                         "schema": {
                             "$ref": "#/definitions/docs.ErrorResponse"
                         }
@@ -226,6 +256,12 @@ const docTemplate = `{
                         "description": "Объект команды",
                         "schema": {
                             "$ref": "#/definitions/docs.GetTeamResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет/неверный админский токен",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "404": {
@@ -265,6 +301,12 @@ const docTemplate = `{
                         "description": "Список PR'ов пользователя",
                         "schema": {
                             "$ref": "#/definitions/docs.GetReviewResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет/неверный админский токен",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }

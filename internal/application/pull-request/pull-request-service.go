@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/config"
 	memberEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/entity"
@@ -66,7 +67,15 @@ func (s *PullRequestService) Create(ctx context.Context, prId, prName, authorId 
 }
 
 func (s *PullRequestService) Merge(ctx context.Context, prId string) (prEntity.PullRequest, error) {
-	mergedPr, err := s.repo.Merge(ctx, prId)
+	mergedPr, err := s.repo.UpdateStatus(ctx, prId, func(pr prEntity.PullRequest) (prEntity.PullRequest, bool) {
+		if pr.Status == prEntity.PRMerged {
+			return pr, false
+		}
+
+		pr.MergedAt = time.Now()
+		pr.Status = prEntity.PRMerged
+		return pr, true
+	})
 
 	if err != nil {
 		if errors.Is(err, prErrors.ErrNotFound) {
@@ -100,7 +109,7 @@ func (s *PullRequestService) Reassign(
 			}
 
 			if _, ok := currentReviewersMap[oldReviewerId]; !ok {
-				return "", prErrors.ErrNotCurrentReviewer
+				return "", prErrors.ErrTeamOrUserNotFound
 			}
 
 			activeMembers := make([]string, 0, len(teamMembers))
@@ -129,7 +138,7 @@ func (s *PullRequestService) Reassign(
 
 	if err != nil {
 		if errors.Is(err, prErrors.ErrCannotReassign) ||
-			errors.Is(err, prErrors.ErrNotCurrentReviewer) ||
+			errors.Is(err, prErrors.ErrTeamOrUserNotFound) ||
 			errors.Is(err, prErrors.ErrNotFound) ||
 			errors.Is(err, prErrors.ErrAlreadyMerged) {
 

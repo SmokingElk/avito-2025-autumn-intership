@@ -14,18 +14,28 @@ type PullRequestDTO struct {
 	Status    string         `db:"pr_status"`
 	CreatedAt time.Time      `db:"created_at"`
 	TeamId    string         `db:"team_id"`
-	MergedAt  time.Time      `db:"merged_at"`
+	MergedAt  *time.Time     `db:"merged_at"`
 	Reviewers pq.StringArray `db:"reviewers"`
 }
 
 func (pr PullRequestDTO) ToPullRequestEntity() entity.PullRequest {
+	mergedAt := time.Now()
+	if pr.MergedAt != nil {
+		mergedAt = *pr.MergedAt
+	}
+
+	members := pr.Reviewers
+	if pr.Reviewers == nil {
+		members = []string{}
+	}
+
 	return entity.PullRequest{
 		Id:        pr.Id,
 		Name:      pr.Name,
 		AuthorId:  pr.AuthorId,
 		Status:    entity.PRStatus(pr.Status),
 		CreatedAt: pr.CreatedAt,
-		MergedAt:  pr.MergedAt,
-		Reviewers: pr.Reviewers,
+		MergedAt:  mergedAt,
+		Reviewers: members,
 	}
 }
