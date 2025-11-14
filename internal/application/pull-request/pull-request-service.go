@@ -55,6 +55,10 @@ func (s *PullRequestService) Create(ctx context.Context, prId, prName, authorId 
 	})
 
 	if err != nil {
+		if errors.Is(err, prErrors.ErrAlreadyExists) {
+			return prEntity.PullRequest{}, err
+		}
+
 		return prEntity.PullRequest{}, fmt.Errorf("failed to store pr in repo: %w", err)
 	}
 
@@ -84,11 +88,15 @@ func (s *PullRequestService) Reassign(
 		ctx,
 		prId,
 		oldReviewerId,
-		func(authorId string, currentReviewers []string, teamMembers []memberEntity.Member) (string, error) {
+		func(authorId string, pr prEntity.PullRequest, teamMembers []memberEntity.Member) (string, error) {
+			if pr.Status == prEntity.PRMerged {
+				return "", prErrors.ErrAlreadyMerged
+			}
+
 			currentReviewersMap := make(map[string]struct{})
 
-			for _, member := range teamMembers {
-				currentReviewersMap[member.Id] = struct{}{}
+			for _, member := range pr.Reviewers {
+				currentReviewersMap[member] = struct{}{}
 			}
 
 			if _, ok := currentReviewersMap[oldReviewerId]; !ok {
@@ -122,7 +130,8 @@ func (s *PullRequestService) Reassign(
 	if err != nil {
 		if errors.Is(err, prErrors.ErrCannotReassign) ||
 			errors.Is(err, prErrors.ErrNotCurrentReviewer) ||
-			errors.Is(err, prErrors.ErrNotFound) {
+			errors.Is(err, prErrors.ErrNotFound) ||
+			errors.Is(err, prErrors.ErrAlreadyMerged) {
 
 			return prEntity.PullRequest{}, "", err
 		}

@@ -22,3 +22,7 @@ down:
 .PHONY: clean
 clean:
 	docker compose down -v --remove-orphans
+
+.PHONY: swag
+swag:
+	swag init -g internal/presentation/rest/gin/routes.go --output docs --parseDependency true

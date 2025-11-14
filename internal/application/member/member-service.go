@@ -20,21 +20,21 @@ func CreateMemberService(repo interfaces.MemberRepo) interfaces.MemberService {
 	}
 }
 
-func (s *MemberService) SetIsActive(ctx context.Context, userId string, isActive bool) error {
+func (s *MemberService) SetIsActive(ctx context.Context, userId string, isActive bool) (memberEntity.Member, error) {
 	activity := memberEntity.MemberInactive
 	if isActive {
 		activity = memberEntity.MemberActive
 	}
 
-	err := s.repo.SetActivity(ctx, userId, activity)
+	member, err := s.repo.SetActivity(ctx, userId, activity)
 
 	if err != nil {
 		if errors.Is(err, memberErrors.ErrMemberNotFound) {
-			return err
+			return memberEntity.Member{}, err
 		}
 
-		return fmt.Errorf("failed to set active in repo: %w", err)
+		return memberEntity.Member{}, fmt.Errorf("failed to set active in repo: %w", err)
 	}
 
-	return nil
+	return member, nil
 }

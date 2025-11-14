@@ -12,6 +12,7 @@ type Member struct {
 	Username string
 	Activity MemberActivity
 	TeamId   *string
+	TeamName string
 }
 
 func NewMember(id, username string, activity MemberActivity) Member {
