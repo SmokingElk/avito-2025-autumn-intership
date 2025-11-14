@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type PRStatus string
 
 const (
@@ -12,14 +14,17 @@ type PullRequest struct {
 	Name      string
 	AuthorId  string
 	Status    PRStatus
+	CreatedAt time.Time
+	MergedAt  time.Time
 	Reviewers []string
 }
 
 func NewPullRequest(id, name, authorId string) PullRequest {
 	return PullRequest{
-		Id:       id,
-		Name:     name,
-		AuthorId: authorId,
-		Status:   PROpen,
+		Id:        id,
+		Name:      name,
+		AuthorId:  authorId,
+		Status:    PROpen,
+		CreatedAt: time.Now(),
 	}
 }

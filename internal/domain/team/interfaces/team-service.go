@@ -8,6 +8,6 @@ import (
 )
 
 type TeamService interface {
-	Add(ctx context.Context, name string, membersList []memberEntity.Member) error
+	Upsert(ctx context.Context, name string, membersList []memberEntity.Member) error
 	GetByName(ctx context.Context, name string) (teamEntity.Team, error)
 }
