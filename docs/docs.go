@@ -15,6 +15,84 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/team/add": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Создать команду с участниками (создает/обновляет пользователей)",
+                "parameters": [
+                    {
+                        "description": "Данные для создания/обновления",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.AddTeamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Обновленный пользователь",
+                        "schema": {
+                            "$ref": "#/definitions/docs.AddTeamResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Команда уже существует",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/team/get": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Получить команду с участниками",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Уникальное имя команды",
+                        "name": "team_name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Объект команды",
+                        "schema": {
+                            "$ref": "#/definitions/docs.GetTeamResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Команда не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/getReview": {
             "get": {
                 "security": [
@@ -100,6 +178,42 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "docs.AddTeamRequest": {
+            "type": "object",
+            "properties": {
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.TeamMember"
+                    }
+                },
+                "team_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.AddTeamResponse": {
+            "type": "object",
+            "properties": {
+                "team": {
+                    "$ref": "#/definitions/docs.AddTeamResponseObject"
+                }
+            }
+        },
+        "docs.AddTeamResponseObject": {
+            "type": "object",
+            "properties": {
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.TeamMember"
+                    }
+                },
+                "team_name": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -142,6 +256,20 @@ const docTemplate = `{
                 }
             }
         },
+        "docs.GetTeamResponse": {
+            "type": "object",
+            "properties": {
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.TeamMember"
+                    }
+                },
+                "team_name": {
+                    "type": "string"
+                }
+            }
+        },
         "docs.SetIsActiveRequest": {
             "type": "object",
             "properties": {
@@ -161,6 +289,20 @@ const docTemplate = `{
                 },
                 "team_name": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.TeamMember": {
+            "type": "object",
+            "properties": {
+                "is_active": {
+                    "type": "boolean"
                 },
                 "user_id": {
                     "type": "string"

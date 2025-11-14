@@ -6,6 +6,7 @@ import (
 	pullRequestInterfaces "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/interfaces"
 	teamInterfaces "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/interfaces"
 	memberhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/member"
+	teamhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/team"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/middleware/cors"
 	request_id "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/middleware/request-id"
 	"github.com/gin-gonic/gin"
@@ -44,4 +45,5 @@ func InitRoutes(
 	api.Use(request_id.AddRequestId())
 
 	memberhandlers.InitMemberHandlers(api, log, memberService, pullRequestService, cfg)
+	teamhandlers.InitTeamHandlers(api, log, teamService, cfg)
 }

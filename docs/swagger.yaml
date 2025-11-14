@@ -1,5 +1,28 @@
 basePath: /api/v1
 definitions:
+  docs.AddTeamRequest:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/docs.TeamMember'
+        type: array
+      team_name:
+        type: string
+    type: object
+  docs.AddTeamResponse:
+    properties:
+      team:
+        $ref: '#/definitions/docs.AddTeamResponseObject'
+    type: object
+  docs.AddTeamResponseObject:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/docs.TeamMember'
+        type: array
+      team_name:
+        type: string
+    type: object
   docs.ErrorResponse:
     properties:
       code:
@@ -27,6 +50,15 @@ definitions:
       user_id:
         type: string
     type: object
+  docs.GetTeamResponse:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/docs.TeamMember'
+        type: array
+      team_name:
+        type: string
+    type: object
   docs.SetIsActiveRequest:
     properties:
       is_active:
@@ -45,6 +77,15 @@ definitions:
       username:
         type: string
     type: object
+  docs.TeamMember:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -52,6 +93,55 @@ info:
   title: PR Reviewer Assignment Service (Test Task, Fall 2025)
   version: 1.0.0
 paths:
+  /team/add:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для создания/обновления
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.AddTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Обновленный пользователь
+          schema:
+            $ref: '#/definitions/docs.AddTeamResponse'
+        "400":
+          description: Команда уже существует
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Создать команду с участниками (создает/обновляет пользователей)
+      tags:
+      - Teams
+  /team/get:
+    get:
+      parameters:
+      - description: Уникальное имя команды
+        in: query
+        name: team_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Объект команды
+          schema:
+            $ref: '#/definitions/docs.GetTeamResponse'
+        "404":
+          description: Команда не найдена
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить команду с участниками
+      tags:
+      - Teams
   /users/getReview:
     get:
       parameters:

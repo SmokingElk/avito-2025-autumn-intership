@@ -58,3 +58,49 @@ type GetReviewResponse struct {
 	UserId       string                `json:"user_id"`
 	PullRequests []GetReviewPRResponse `json:"pull_requests"`
 }
+
+type TeamMember struct {
+	UserId   string `json:"user_id"`
+	Username string `json:"username"`
+	IsActive bool   `json:"is_active"`
+}
+
+func ToTeamMember(member memberEntity.Member) TeamMember {
+	return TeamMember{
+		UserId:   member.Id,
+		Username: member.Username,
+		IsActive: member.Activity == memberEntity.MemberActive,
+	}
+}
+
+func (m *TeamMember) ToTeamMemberEntity() memberEntity.Member {
+	activity := memberEntity.MemberActive
+	if !m.IsActive {
+		activity = memberEntity.MemberInactive
+	}
+
+	return memberEntity.Member{
+		Id:       m.UserId,
+		Username: m.Username,
+		Activity: activity,
+	}
+}
+
+type AddTeamRequest struct {
+	Name    string       `json:"team_name"`
+	Members []TeamMember `json:"members"`
+}
+
+type AddTeamResponseObject struct {
+	Name    string       `json:"team_name"`
+	Members []TeamMember `json:"members"`
+}
+
+type AddTeamResponse struct {
+	Team AddTeamResponseObject `json:"team"`
+}
+
+type GetTeamResponse struct {
+	Name    string       `json:"team_name"`
+	Members []TeamMember `json:"members"`
+}
