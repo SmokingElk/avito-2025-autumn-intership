@@ -7,5 +7,5 @@ import (
 )
 
 type MemberRepo interface {
-	SetActivity(ctx context.Context, userId string, activity memberEntity.MemberActivity) error
+	SetActivity(ctx context.Context, userId string, activity memberEntity.MemberActivity) (memberEntity.Member, error)
 }

@@ -1,0 +1,114 @@
+basePath: /api/v1
+definitions:
+  docs.ErrorResponse:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  docs.GetReviewPRResponse:
+    properties:
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.GetReviewResponse:
+    properties:
+      pull_requests:
+        items:
+          $ref: '#/definitions/docs.GetReviewPRResponse'
+        type: array
+      user_id:
+        type: string
+    type: object
+  docs.SetIsActiveRequest:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  docs.SetIsActiveResponse:
+    properties:
+      is_active:
+        type: boolean
+      team_name:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for pull requests managment in teams
+  title: PR Reviewer Assignment Service (Test Task, Fall 2025)
+  version: 1.0.0
+paths:
+  /users/getReview:
+    get:
+      parameters:
+      - description: Идентификатор пользователя
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список PR'ов пользователя
+          schema:
+            $ref: '#/definitions/docs.GetReviewResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить PR'ы, где пользователь установлен ревьювером
+      tags:
+      - Users
+  /users/setIsActive:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для обновления
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.SetIsActiveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленный пользователь
+          schema:
+            $ref: '#/definitions/docs.SetIsActiveResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Установить флаг активности пользователя
+      tags:
+      - Users
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
