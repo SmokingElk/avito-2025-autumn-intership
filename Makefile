@@ -26,3 +26,16 @@ clean:
 .PHONY: swag
 swag:
 	swag init -g internal/presentation/rest/gin/routes.go --output docs --parseDependency true
+
+.PHONY: mocks
+mocks:
+	mockgen -source=internal/domain/member/interfaces/member-repo.go \
+	-destination=internal/domain/member/mocks/mock-member-repo.go
+	mockgen -source=internal/domain/team/interfaces/team-repo.go \
+	-destination=internal/domain/team/mocks/mock-team-repo.go
+	mockgen -source=internal/domain/pull-request/interfaces/pull-request-repo.go \
+	-destination=internal/domain/pull-request/mocks/mock-pull-request-repo.go
+
+.PHONY: test
+test: 
+	go test -v -count=1 ./...
