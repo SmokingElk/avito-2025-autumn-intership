@@ -52,7 +52,10 @@ func (h *MemberHandlers) SetIsActive(ctx *gin.Context) {
 
 	if err := ctx.BindJSON(&request); err != nil {
 		log.Warn().Msg("invalid body")
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid body",
+		))
 		return
 	}
 
@@ -99,7 +102,10 @@ func (h *MemberHandlers) GetReview(ctx *gin.Context) {
 
 	if userId == "" {
 		log.Warn().Msg("invalid user_id param")
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid user_id param",
+		))
 		return
 	}
 
