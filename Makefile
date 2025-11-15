@@ -39,3 +39,8 @@ mocks:
 .PHONY: test
 test: 
 	go test -v -count=1 ./...
+
+cover:
+	go test -coverprofile=cover.out -count=1 ./...
+	go tool cover -html=cover.out
+	DEL cover.out

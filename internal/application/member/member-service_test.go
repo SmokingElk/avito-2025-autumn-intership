@@ -92,6 +92,7 @@ func TestSetIsActive(t *testing.T) {
 			member, err := service.SetIsActive(context.Background(), userId, tc.isActive)
 
 			if tc.noError {
+				assert.NoError(t, err)
 				assert.Equal(t, tc.expectedMember, member)
 			} else {
 				assert.Equal(t, tc.expectedError, err.Error())
