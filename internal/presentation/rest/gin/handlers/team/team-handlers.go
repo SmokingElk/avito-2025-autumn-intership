@@ -35,8 +35,8 @@ func CreateTeamHandlers(teamService interfaces.TeamService, log zerolog.Logger) 
 // @Produce json
 // @Param input body docs.AddTeamRequest true "Данные для создания/обновления"
 // @Success 201 {object} docs.AddTeamResponse "Команда создана"
-// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 400 {object} docs.ErrorResponse "Команда уже существует"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 409 {object} docs.ErrorResponse "Пользователь является членом другой команды"
 // @Router /team/add [post]
 func (h *TeamHandlers) Add(ctx *gin.Context) {
@@ -46,7 +46,10 @@ func (h *TeamHandlers) Add(ctx *gin.Context) {
 
 	if err := ctx.BindJSON(&request); err != nil {
 		log.Warn().Msg("invalid body")
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid body",
+		))
 		return
 	}
 
@@ -111,7 +114,10 @@ func (h *TeamHandlers) Get(ctx *gin.Context) {
 
 	if teamName == "" {
 		log.Warn().Msg("invalid team_name param")
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid team_name param",
+		))
 		return
 	}
 
@@ -120,7 +126,7 @@ func (h *TeamHandlers) Get(ctx *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, teamErrors.ErrTeamNotFound):
-			log.Warn().Msg("team already exists")
+			log.Warn().Msg("team not found")
 			ctx.AbortWithStatusJSON(http.StatusNotFound, docs.NewErrorResponse(
 				"NOT_FOUND",
 				"resource not found",
