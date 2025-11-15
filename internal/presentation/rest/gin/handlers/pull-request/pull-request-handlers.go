@@ -46,7 +46,10 @@ func (h *PullRequestHandlers) Create(ctx *gin.Context) {
 
 	if err := ctx.BindJSON(&request); err != nil {
 		log.Warn().Msg("invalid body")
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid body",
+		))
 		return
 	}
 
@@ -112,7 +115,10 @@ func (h *PullRequestHandlers) Merge(ctx *gin.Context) {
 
 	if err := ctx.BindJSON(&request); err != nil {
 		log.Warn().Msg("invalid body")
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid body",
+		))
 		return
 	}
 
@@ -128,10 +134,10 @@ func (h *PullRequestHandlers) Merge(ctx *gin.Context) {
 			))
 
 		default:
-			log.Error().Err(err).Msg("failed to create pr")
+			log.Error().Err(err).Msg("failed to merge pr")
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, docs.NewErrorResponse(
 				"INTERNAL_SERVER_ERROR",
-				fmt.Sprintf("failed to create pr: %s", err.Error()),
+				fmt.Sprintf("failed to merge pr: %s", err.Error()),
 			))
 		}
 
@@ -149,7 +155,7 @@ func (h *PullRequestHandlers) Merge(ctx *gin.Context) {
 		},
 	}
 
-	ctx.JSON(http.StatusCreated, resp)
+	ctx.JSON(http.StatusOK, resp)
 
 	log.Info().Msg("successfully merged pr")
 }
@@ -173,7 +179,10 @@ func (h *PullRequestHandlers) Reassign(ctx *gin.Context) {
 
 	if err := ctx.BindJSON(&request); err != nil {
 		log.Warn().Msg("invalid body")
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid body",
+		))
 		return
 	}
 
@@ -197,16 +206,18 @@ func (h *PullRequestHandlers) Reassign(ctx *gin.Context) {
 
 		case errors.Is(err, prErrors.ErrAlreadyMerged):
 			log.Warn().Msg("pr already merged")
+			// suggest it must be the other code here
+			// did according to given openapi
 			ctx.AbortWithStatusJSON(http.StatusConflict, docs.NewErrorResponse(
 				"NOT_FOUND",
 				"resource not found",
 			))
 
 		default:
-			log.Error().Err(err).Msg("failed to create pr")
+			log.Error().Err(err).Msg("failed to reassign")
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, docs.NewErrorResponse(
 				"INTERNAL_SERVER_ERROR",
-				fmt.Sprintf("failed to create pr: %s", err.Error()),
+				fmt.Sprintf("failed to reassign: %s", err.Error()),
 			))
 		}
 
@@ -224,7 +235,7 @@ func (h *PullRequestHandlers) Reassign(ctx *gin.Context) {
 		ReplacedBy: new,
 	}
 
-	ctx.JSON(http.StatusCreated, resp)
+	ctx.JSON(http.StatusOK, resp)
 
 	log.Info().Msg("successfully reassigned")
 }
