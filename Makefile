@@ -40,6 +40,10 @@ mocks:
 test: 
 	go test -v -count=1 ./...
 
+.PHONY: test10
+test10: 
+	go test -v -count=10 ./...
+
 cover:
 	go test -coverprofile=cover.out -count=1 ./...
 	go tool cover -html=cover.out
