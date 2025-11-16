@@ -18,8 +18,8 @@ func CreateStatsService(repo interfaces.StatsRepo) interfaces.StatsService {
 	}
 }
 
-func (s *StatsService) GetAssigmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
-	stats, err := s.repo.GetAssigmentsPerMember(ctx, limit, offset)
+func (s *StatsService) GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
+	stats, err := s.repo.GetAssignmentsPerMember(ctx, limit, offset)
 
 	if err != nil {
 		return []entity.AssignmentsPerMember{}, fmt.Errorf("failed to get assignments stats from repo: %w", err)

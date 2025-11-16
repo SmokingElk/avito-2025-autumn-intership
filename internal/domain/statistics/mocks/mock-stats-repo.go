@@ -35,17 +35,17 @@ func (m *MockStatsRepo) EXPECT() *MockStatsRepoMockRecorder {
 	return m.recorder
 }
 
-// GetAssigmentsPerMember mocks base method.
-func (m *MockStatsRepo) GetAssigmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
+// GetAssignmentsPerMember mocks base method.
+func (m *MockStatsRepo) GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAssigmentsPerMember", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAssignmentsPerMember", ctx, limit, offset)
 	ret0, _ := ret[0].([]entity.AssignmentsPerMember)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAssigmentsPerMember indicates an expected call of GetAssigmentsPerMember.
-func (mr *MockStatsRepoMockRecorder) GetAssigmentsPerMember(ctx, limit, offset interface{}) *gomock.Call {
+// GetAssignmentsPerMember indicates an expected call of GetAssignmentsPerMember.
+func (mr *MockStatsRepoMockRecorder) GetAssignmentsPerMember(ctx, limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAssigmentsPerMember", reflect.TypeOf((*MockStatsRepo)(nil).GetAssigmentsPerMember), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAssignmentsPerMember", reflect.TypeOf((*MockStatsRepo)(nil).GetAssignmentsPerMember), ctx, limit, offset)
 }

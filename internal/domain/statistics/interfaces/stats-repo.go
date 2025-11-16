@@ -7,5 +7,5 @@ import (
 )
 
 type StatsRepo interface {
-	GetAssigmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error)
+	GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error)
 }

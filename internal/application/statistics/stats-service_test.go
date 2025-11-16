@@ -62,7 +62,7 @@ func TestGetAssigmentsPerMember(t *testing.T) {
 
 			mockStatsRepo := statsMocks.NewMockStatsRepo(ctrl)
 
-			mockStatsRepo.EXPECT().GetAssigmentsPerMember(
+			mockStatsRepo.EXPECT().GetAssignmentsPerMember(
 				gomock.Any(),
 				tc.limit,
 				tc.offset,
@@ -70,7 +70,7 @@ func TestGetAssigmentsPerMember(t *testing.T) {
 
 			statsService := statsservice.CreateStatsService(mockStatsRepo)
 
-			stats, err := statsService.GetAssigmentsPerMember(context.Background(), tc.limit, tc.offset)
+			stats, err := statsService.GetAssignmentsPerMember(context.Background(), tc.limit, tc.offset)
 
 			if tc.noError {
 				assert.NoError(t, err)

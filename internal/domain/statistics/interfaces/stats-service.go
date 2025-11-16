@@ -7,5 +7,5 @@ import (
 )
 
 type StatsService interface {
-	GetAssigmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error)
+	GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error)
 }

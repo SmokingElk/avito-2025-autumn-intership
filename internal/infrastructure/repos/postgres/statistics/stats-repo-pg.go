@@ -22,7 +22,7 @@ func CreateStatsRepoPg(db *sqlx.DB) interfaces.StatsRepo {
 	}
 }
 
-func (r *StatsRepoPg) GetAssigmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
+func (r *StatsRepoPg) GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
 	query := `
 	SELECT member_id, COUNT(*) AS assigments_count
 	FROM assigned_reviewer
