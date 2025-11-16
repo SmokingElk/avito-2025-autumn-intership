@@ -28,7 +28,7 @@ func main() {
 
 	log.Debug().Msg("debug messages on")
 
-	router := gin.Default()
+	router := gin.New()
 
 	close := di.MustConfigureApp(router, config, log)
 	defer close()

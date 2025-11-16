@@ -151,3 +151,8 @@ type ReassignResponse struct {
 	Pr         PRResponseObject `json:"pr"`
 	ReplacedBy string           `json:"replaced_by"`
 }
+
+type HealthResponse struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}

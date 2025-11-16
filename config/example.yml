@@ -3,6 +3,7 @@ env: develop
 rest:
   port: 8080
   allow_origin: http://localhost:8080
+  skip_logging: /api/v1/health
 
 postgres:
   user: Admin

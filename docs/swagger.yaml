@@ -73,6 +73,13 @@ definitions:
       team_name:
         type: string
     type: object
+  docs.HealthResponse:
+    properties:
+      name:
+        type: string
+      status:
+        type: string
+    type: object
   docs.MergePRRequest:
     properties:
       pull_request_id:
@@ -163,6 +170,18 @@ info:
   title: PR Reviewer Assignment Service (Test Task, Fall 2025)
   version: 1.0.0
 paths:
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service healthy
+          schema:
+            $ref: '#/definitions/docs.HealthResponse'
+      summary: Проверка работоспособности сервиса
+      tags:
+      - Health
   /pullRequest/create:
     post:
       consumes:
