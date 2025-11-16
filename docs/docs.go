@@ -175,6 +175,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/docs.ReassignResponse"
                         }
                     },
+                    "400": {
+                        "description": "Не достаточно активных членов для переназначения",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
                     "401": {
                         "description": "Нет/неверный админский токен",
                         "schema": {
@@ -208,15 +214,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Отступ в статистике",
-                        "name": "offset",
+                        "description": "Количество записей в результате",
+                        "name": "limit",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "Количество записей в результате",
-                        "name": "limit",
+                        "description": "Отступ в статистике",
+                        "name": "offset",
                         "in": "query",
                         "required": true
                     }
@@ -263,12 +269,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Команда уже существует",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Нет/неверный админский токен",
                         "schema": {
                             "$ref": "#/definitions/docs.ErrorResponse"
                         }
@@ -502,6 +502,14 @@ const docTemplate = `{
             }
         },
         "docs.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/docs.ErrorResponseObject"
+                }
+            }
+        },
+        "docs.ErrorResponseObject": {
             "type": "object",
             "properties": {
                 "code": {

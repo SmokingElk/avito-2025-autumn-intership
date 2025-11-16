@@ -50,7 +50,7 @@ func TestCreate(t *testing.T) {
   				"pull_request_name": "pull request 1"
   			`,
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid body"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid body"}}`,
 		},
 
 		{
@@ -69,7 +69,7 @@ func TestCreate(t *testing.T) {
 			},
 			repoError:    prErrors.ErrTeamOrUserNotFound,
 			expectedCode: http.StatusNotFound,
-			expectedBody: `{"code":"NOT_FOUND","message":"resource not found"}`,
+			expectedBody: `{"error":{"code":"NOT_FOUND","message":"resource not found"}}`,
 		},
 
 		{
@@ -88,7 +88,7 @@ func TestCreate(t *testing.T) {
 			},
 			repoError:    prErrors.ErrAlreadyExists,
 			expectedCode: http.StatusConflict,
-			expectedBody: `{"code":"PR_EXISTS","message":"PR id already exists"}`,
+			expectedBody: `{"error":{"code":"PR_EXISTS","message":"PR id already exists"}}`,
 		},
 
 		{
@@ -107,8 +107,8 @@ func TestCreate(t *testing.T) {
 			},
 			repoError:    errors.New("db is down"),
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to create pr: failed to store pr in repo: ` +
-				`db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to create pr: ` +
+				`failed to store pr in repo: db is down"}}`,
 		},
 
 		{
@@ -200,7 +200,7 @@ func TestMerge(t *testing.T) {
 				"pull_request_id": "pr1"
 			`,
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid body"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid body"}}`,
 		},
 
 		{
@@ -212,7 +212,7 @@ func TestMerge(t *testing.T) {
 			prId:         "pr1",
 			repoError:    prErrors.ErrNotFound,
 			expectedCode: http.StatusNotFound,
-			expectedBody: `{"code":"NOT_FOUND","message":"resource not found"}`,
+			expectedBody: `{"error":{"code":"NOT_FOUND","message":"resource not found"}}`,
 		},
 
 		{
@@ -224,8 +224,8 @@ func TestMerge(t *testing.T) {
 			prId:         "pr1",
 			repoError:    errors.New("db is down"),
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to merge pr: ` +
-				`failed to merge pr in repo: db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to merge pr: ` +
+				`failed to merge pr in repo: db is down"}}`,
 		},
 
 		{
@@ -314,7 +314,21 @@ func TestReassign(t *testing.T) {
 				"pull_request_id": "pr1"
 			`,
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid body"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid body"}}`,
+		},
+
+		{
+			what: "pr not found",
+
+			body: `{
+				"old_reviewer_id": "u1",
+				"pull_request_id": "pr1"
+			}`,
+			prId:          "pr1",
+			oldReviewerId: "u1",
+			repoError:     prErrors.ErrCannotReassign,
+			expectedCode:  http.StatusBadRequest,
+			expectedBody:  `{"error":{"code":"CANNOT_REASSIGN","message":"no member to reassign"}}`,
 		},
 
 		{
@@ -328,7 +342,7 @@ func TestReassign(t *testing.T) {
 			oldReviewerId: "u1",
 			repoError:     prErrors.ErrNotFound,
 			expectedCode:  http.StatusNotFound,
-			expectedBody:  `{"code":"NOT_FOUND","message":"resource not found"}`,
+			expectedBody:  `{"error":{"code":"NOT_FOUND","message":"resource not found"}}`,
 		},
 
 		{
@@ -342,7 +356,7 @@ func TestReassign(t *testing.T) {
 			oldReviewerId: "u1",
 			repoError:     prErrors.ErrTeamOrUserNotFound,
 			expectedCode:  http.StatusNotFound,
-			expectedBody:  `{"code":"NOT_FOUND","message":"resource not found"}`,
+			expectedBody:  `{"error":{"code":"NOT_FOUND","message":"resource not found"}}`,
 		},
 
 		{
@@ -356,7 +370,7 @@ func TestReassign(t *testing.T) {
 			oldReviewerId: "u1",
 			repoError:     prErrors.ErrAlreadyMerged,
 			expectedCode:  http.StatusConflict,
-			expectedBody:  `{"code":"NOT_FOUND","message":"resource not found"}`,
+			expectedBody:  `{"error":{"code":"PR_MERGED","message":"cannot reassign on merged PR"}}`,
 		},
 
 		{
@@ -370,8 +384,8 @@ func TestReassign(t *testing.T) {
 			oldReviewerId: "u1",
 			repoError:     errors.New("db is down"),
 			expectedCode:  http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to reassign: ` +
-				`failed to reassign reviewer in repo: db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to reassign: ` +
+				`failed to reassign reviewer in repo: db is down"}}`,
 		},
 
 		{

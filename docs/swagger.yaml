@@ -55,6 +55,11 @@ definitions:
     type: object
   docs.ErrorResponse:
     properties:
+      error:
+        $ref: '#/definitions/docs.ErrorResponseObject'
+    type: object
+  docs.ErrorResponseObject:
+    properties:
       code:
         type: string
       message:
@@ -282,6 +287,10 @@ paths:
           description: Переназначение выполнено
           schema:
             $ref: '#/definitions/docs.ReassignResponse'
+        "400":
+          description: Не достаточно активных членов для переназначения
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
         "401":
           description: Нет/неверный админский токен
           schema:
@@ -302,14 +311,14 @@ paths:
   /stats/assignmentsPerMember:
     get:
       parameters:
-      - description: Отступ в статистике
-        in: query
-        name: offset
-        required: true
-        type: integer
       - description: Количество записей в результате
         in: query
         name: limit
+        required: true
+        type: integer
+      - description: Отступ в статистике
+        in: query
+        name: offset
         required: true
         type: integer
       produces:
@@ -342,10 +351,6 @@ paths:
             $ref: '#/definitions/docs.AddTeamResponse'
         "400":
           description: Команда уже существует
-          schema:
-            $ref: '#/definitions/docs.ErrorResponse'
-        "401":
-          description: Нет/неверный админский токен
           schema:
             $ref: '#/definitions/docs.ErrorResponse'
         "409":
