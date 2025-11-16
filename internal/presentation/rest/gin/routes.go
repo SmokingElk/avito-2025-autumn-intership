@@ -4,9 +4,11 @@ import (
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/config"
 	memberInterfaces "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/interfaces"
 	pullRequestInterfaces "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/interfaces"
+	statsInterfaces "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/statistics/interfaces"
 	teamInterfaces "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/interfaces"
 	memberhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/member"
 	pullrequesthandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/pull-request"
+	statshandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/statistics"
 	teamhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/team"
 	healthhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/health"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/middleware/cors"
@@ -39,6 +41,7 @@ func InitRoutes(
 	memberService memberInterfaces.MemberService,
 	teamService teamInterfaces.TeamService,
 	pullRequestService pullRequestInterfaces.PullRequestService,
+	statsService statsInterfaces.StatsService,
 ) {
 	r.Use(ginlogger.SkipLogger(cfg))
 	r.Use(gin.Recovery())
@@ -53,5 +56,6 @@ func InitRoutes(
 	memberhandlers.InitMemberHandlers(api, log, memberService, pullRequestService, cfg)
 	teamhandlers.InitTeamHandlers(api, log, teamService, cfg)
 	pullrequesthandlers.InitPullRequestHandlers(api, log, pullRequestService, cfg)
+	statshandlers.InitStatsHandlers(api, statsService)
 	healthhandlers.InitHealthHandlers(api)
 }

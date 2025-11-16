@@ -35,6 +35,8 @@ mocks:
 	-destination=internal/domain/team/mocks/mock-team-repo.go
 	mockgen -source=internal/domain/pull-request/interfaces/pull-request-repo.go \
 	-destination=internal/domain/pull-request/mocks/mock-pull-request-repo.go
+	mockgen -source=internal/domain/statistics/interfaces/stats-repo.go \
+	-destination=internal/domain/statistics/mocks/mock-stats-repo.go
 
 .PHONY: test
 test: 

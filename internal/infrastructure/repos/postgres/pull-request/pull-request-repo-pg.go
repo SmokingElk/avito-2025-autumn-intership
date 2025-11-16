@@ -10,7 +10,7 @@ import (
 	prEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/entity"
 	prErrors "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/errors"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/interfaces"
-	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/pull-request/dto"
+	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/pull-request/dto"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )

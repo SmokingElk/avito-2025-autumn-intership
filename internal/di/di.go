@@ -3,12 +3,14 @@ package di
 import (
 	memberservice "github.com/SmokingElk/avito-2025-autumn-intership/internal/application/member"
 	pullrequestservice "github.com/SmokingElk/avito-2025-autumn-intership/internal/application/pull-request"
+	statsservice "github.com/SmokingElk/avito-2025-autumn-intership/internal/application/statistics"
 	teamservice "github.com/SmokingElk/avito-2025-autumn-intership/internal/application/team"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/config"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/clients/postgres"
-	memberrepopg "github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/member"
-	pullrequestrepopg "github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/pull-request"
-	teamrepopg "github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/team"
+	memberrepopg "github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/member"
+	pullrequestrepopg "github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/pull-request"
+	statsrepopg "github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/statistics"
+	teamrepopg "github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/team"
 	rest "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -24,12 +26,14 @@ func MustConfigureApp(r *gin.Engine, cfg *config.Config, log zerolog.Logger) fun
 	memberRepo := memberrepopg.CreateMemberRepoPg(conn)
 	teamRepo := teamrepopg.CreateTeamRepoPg(conn)
 	pullRequestRepo := pullrequestrepopg.CreatePullRequestRepoPg(conn)
+	statsRepo := statsrepopg.CreateStatsRepoPg(conn)
 
 	memberService := memberservice.CreateMemberService(memberRepo)
 	teamService := teamservice.CreateTeamService(teamRepo)
 	pullrequestservice := pullrequestservice.CreatePullRequestService(pullRequestRepo, &cfg.PullRequestConfig)
+	statsService := statsservice.CreateStatsService(statsRepo)
 
-	rest.InitRoutes(r, &cfg.RestConfig, log, memberService, teamService, pullrequestservice)
+	rest.InitRoutes(r, &cfg.RestConfig, log, memberService, teamService, pullrequestservice, statsService)
 
 	return func() {
 		conn.Close()

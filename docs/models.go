@@ -5,6 +5,7 @@ import (
 
 	memberEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/entity"
 	prEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/pull-request/entity"
+	statsEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/statistics/entity"
 )
 
 type ErrorResponse struct {
@@ -155,4 +156,21 @@ type ReassignResponse struct {
 type HealthResponse struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
+}
+
+type AssignmentsPerMember struct {
+	MemberId         string `json:"member_id"`
+	AssignmentsCount int    `json:"assigments_count"`
+}
+
+func ToAssignmentsPerMemberResponse(a statsEntity.AssignmentsPerMember) AssignmentsPerMember {
+	return AssignmentsPerMember{
+		MemberId:         a.MemberId,
+		AssignmentsCount: a.AssignmentsCount,
+	}
+}
+
+type AssignmentsStats struct {
+	Count   int                    `json:"count"`
+	Results []AssignmentsPerMember `json:"results"`
 }

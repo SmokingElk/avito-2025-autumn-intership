@@ -196,6 +196,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/stats/assignmentsPerMember": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Stats"
+                ],
+                "summary": "Получить статистику назначений пользователей ревьюверами",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Отступ в статистике",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей в результате",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статистика по назначениям",
+                        "schema": {
+                            "$ref": "#/definitions/docs.AssignmentsStats"
+                        }
+                    }
+                }
+            }
+        },
         "/team/add": {
             "post": {
                 "consumes": [
@@ -416,6 +451,31 @@ const docTemplate = `{
                 },
                 "team_name": {
                     "type": "string"
+                }
+            }
+        },
+        "docs.AssignmentsPerMember": {
+            "type": "object",
+            "properties": {
+                "assigments_count": {
+                    "type": "integer"
+                },
+                "member_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.AssignmentsStats": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/docs.AssignmentsPerMember"
+                    }
                 }
             }
         },

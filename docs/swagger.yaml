@@ -23,6 +23,22 @@ definitions:
       team_name:
         type: string
     type: object
+  docs.AssignmentsPerMember:
+    properties:
+      assigments_count:
+        type: integer
+      member_id:
+        type: string
+    type: object
+  docs.AssignmentsStats:
+    properties:
+      count:
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/docs.AssignmentsPerMember'
+        type: array
+    type: object
   docs.CreatePRRequest:
     properties:
       author_id:
@@ -283,6 +299,29 @@ paths:
       summary: Переназначить конкретного ревьювера на другого из его команды
       tags:
       - PullRequests
+  /stats/assignmentsPerMember:
+    get:
+      parameters:
+      - description: Отступ в статистике
+        in: query
+        name: offset
+        required: true
+        type: integer
+      - description: Количество записей в результате
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статистика по назначениям
+          schema:
+            $ref: '#/definitions/docs.AssignmentsStats'
+      summary: Получить статистику назначений пользователей ревьюверами
+      tags:
+      - Stats
   /team/add:
     post:
       consumes:

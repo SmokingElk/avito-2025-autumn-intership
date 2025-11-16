@@ -9,7 +9,7 @@ import (
 	memberEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/entity"
 	memberErrors "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/errors"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/interfaces"
-	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/member/dto"
+	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/member/dto"
 	"github.com/jmoiron/sqlx"
 )
 
