@@ -24,9 +24,11 @@ func CreateStatsRepoPg(db *sqlx.DB) interfaces.StatsRepo {
 
 func (r *StatsRepoPg) GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
 	query := `
-	SELECT member_id, COUNT(*) AS assigments_count
-	FROM assigned_reviewer
-	GROUP BY member_id
+	SELECT m.id AS member_id, COUNT(a.pr_id) AS assigments_count
+	FROM team_member AS m
+	LEFT JOIN assigned_reviewer AS a
+		ON a.member_id = m.id
+	GROUP BY m.id
 	ORDER BY assigments_count DESC
 	LIMIT $1
 	OFFSET $2
