@@ -25,7 +25,7 @@ import (
 
 // @title PR Reviewer Assignment Service (Test Task, Fall 2025)
 // @version 1.0.0
-// @description API for pull requests managment in teams
+// @description API for pull requests management in teams
 // @host localhost:8080
 // @BasePath /api/v1
 // @schemes http https

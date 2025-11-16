@@ -14,9 +14,9 @@ LEFT JOIN assigned_reviewer AS a
 GROUP BY pr.id;
 
 CREATE VIEW assignments_per_members AS
-SELECT m.id AS member_id, COUNT(a.pr_id) AS assigments_count
+SELECT m.id AS member_id, COUNT(a.pr_id) AS assignments_count
 FROM team_member AS m
 LEFT JOIN assigned_reviewer AS a
     ON a.member_id = m.id
 GROUP BY m.id
-ORDER BY assigments_count DESC;
+ORDER BY assignments_count DESC;

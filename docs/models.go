@@ -160,7 +160,7 @@ type HealthResponse struct {
 
 type AssignmentsPerMember struct {
 	MemberId         string `json:"member_id"`
-	AssignmentsCount int    `json:"assigments_count"`
+	AssignmentsCount int    `json:"assignments_count"`
 }
 
 func ToAssignmentsPerMemberResponse(a statsEntity.AssignmentsPerMember) AssignmentsPerMember {

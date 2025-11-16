@@ -4,7 +4,7 @@ import "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/statis
 
 type AssignmentsPerMember struct {
 	MemberId         string `db:"member_id"`
-	AssignmentsCount int    `db:"assigments_count"`
+	AssignmentsCount int    `db:"assignments_count"`
 }
 
 func (a *AssignmentsPerMember) ToAssignmentsPerMemberEntity() entity.AssignmentsPerMember {

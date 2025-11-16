@@ -81,8 +81,8 @@ func TestGetAssignmentsPerMember(t *testing.T) {
 				},
 			},
 			expectedCode: http.StatusOK,
-			expectedBody: `{"count":2,"results":[{"member_id":"u1","assigments_count":5},` +
-				`{"member_id":"u2","assigments_count":2}]}`,
+			expectedBody: `{"count":2,"results":[{"member_id":"u1","assignments_count":5},` +
+				`{"member_id":"u2","assignments_count":2}]}`,
 		},
 	}
 

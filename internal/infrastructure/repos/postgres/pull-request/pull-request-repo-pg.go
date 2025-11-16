@@ -13,17 +13,20 @@ import (
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/pull-request/dto"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"github.com/rs/zerolog"
 )
 
 const primaryKeyViolation = "23505"
 
 type PullRequestRepoPg struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger zerolog.Logger
 }
 
-func CreatePullRequestRepoPg(db *sqlx.DB) interfaces.PullRequestRepo {
+func CreatePullRequestRepoPg(db *sqlx.DB, log zerolog.Logger) interfaces.PullRequestRepo {
 	return &PullRequestRepoPg{
-		db: db,
+		db:     db,
+		logger: log,
 	}
 }
 
@@ -74,7 +77,9 @@ func (r *PullRequestRepoPg) Create(
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				r.logger.Error().Err(err).Msg("failed to rollback transaction")
+			}
 		}
 	}()
 
@@ -172,7 +177,9 @@ func (r *PullRequestRepoPg) UpdateStatus(
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				r.logger.Error().Err(err).Msg("failed to rollback transaction")
+			}
 		}
 	}()
 
@@ -234,7 +241,9 @@ func (r *PullRequestRepoPg) Reassign(
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				r.logger.Error().Err(err).Msg("failed to rollback transaction")
+			}
 		}
 	}()
 

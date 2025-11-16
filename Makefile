@@ -54,3 +54,7 @@ cover:
 .PHONY: load_test_data
 load_test_data:
 	docker exec -i pr-svc_postgres psql -U Admin -d pr-service -f /scripts/fill-with-test-data.sql
+
+.PHONY: lint
+lint:
+	golangci-lint -v run ./...
