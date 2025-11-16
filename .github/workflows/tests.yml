@@ -1,0 +1,19 @@
+name: pr service tests
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    container: 
+      image: golang:1.24.10-alpine
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run tests
+      run: go test -v -count=10 ./...

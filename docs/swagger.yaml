@@ -1,0 +1,495 @@
+basePath: /api/v1
+definitions:
+  docs.AddTeamRequest:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/docs.TeamMember'
+        type: array
+      team_name:
+        type: string
+    type: object
+  docs.AddTeamResponse:
+    properties:
+      team:
+        $ref: '#/definitions/docs.AddTeamResponseObject'
+    type: object
+  docs.AddTeamResponseObject:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/docs.TeamMember'
+        type: array
+      team_name:
+        type: string
+    type: object
+  docs.AssignmentsPerMember:
+    properties:
+      assignments_count:
+        type: integer
+      member_id:
+        type: string
+    type: object
+  docs.AssignmentsStats:
+    properties:
+      count:
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/docs.AssignmentsPerMember'
+        type: array
+    type: object
+  docs.CreatePRRequest:
+    properties:
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+    type: object
+  docs.CreatePRResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/docs.PRResponseObject'
+    type: object
+  docs.DeactivateAllRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  docs.DeactivateAllResponse:
+    properties:
+      result:
+        type: string
+    type: object
+  docs.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/docs.ErrorResponseObject'
+    type: object
+  docs.ErrorResponseObject:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  docs.GetReviewPRResponse:
+    properties:
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.GetReviewResponse:
+    properties:
+      pull_requests:
+        items:
+          $ref: '#/definitions/docs.GetReviewPRResponse'
+        type: array
+      user_id:
+        type: string
+    type: object
+  docs.GetTeamResponse:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/docs.TeamMember'
+        type: array
+      team_name:
+        type: string
+    type: object
+  docs.HealthResponse:
+    properties:
+      name:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.MergePRRequest:
+    properties:
+      pull_request_id:
+        type: string
+    type: object
+  docs.MergePRResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/docs.MergePRResponseObject'
+    type: object
+  docs.MergePRResponseObject:
+    properties:
+      assigned_reviewers:
+        items:
+          type: string
+        type: array
+      author_id:
+        type: string
+      mergedAt:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.PRResponseObject:
+    properties:
+      assigned_reviewers:
+        items:
+          type: string
+        type: array
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.ReassignRequest:
+    properties:
+      old_reviewer_id:
+        type: string
+      pull_request_id:
+        type: string
+    type: object
+  docs.ReassignResponse:
+    properties:
+      pr:
+        $ref: '#/definitions/docs.PRResponseObject'
+      replaced_by:
+        type: string
+    type: object
+  docs.SetIsActiveRequest:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  docs.SetIsActiveResponse:
+    properties:
+      is_active:
+        type: boolean
+      team_name:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  docs.TeamMember:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for pull requests management in teams
+  title: PR Reviewer Assignment Service (Test Task, Fall 2025)
+  version: 1.0.0
+paths:
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service healthy
+          schema:
+            $ref: '#/definitions/docs.HealthResponse'
+      summary: Проверка работоспособности сервиса
+      tags:
+      - Health
+  /pullRequest/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для создания
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreatePRRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: PR создан
+          schema:
+            $ref: '#/definitions/docs.CreatePRResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Автор/команда не найдены
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "409":
+          description: PR уже существует
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создать PR и автоматически назначить до 2 ревьюверов из команды авторы
+      tags:
+      - PullRequests
+  /pullRequest/merge:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Идентификатор PR
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.MergePRRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PR в состоянии MERGED
+          schema:
+            $ref: '#/definitions/docs.MergePRResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: PR не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Пометить PR как MERGED (идемпотентная операция)
+      tags:
+      - PullRequests
+  /pullRequest/reassign:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для переназначения
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.ReassignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Переназначение выполнено
+          schema:
+            $ref: '#/definitions/docs.ReassignResponse'
+        "400":
+          description: Не достаточно активных членов для переназначения
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: PR или пользователь найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "409":
+          description: Нарушение доменных правил переназначения
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Переназначить конкретного ревьювера на другого из его команды
+      tags:
+      - PullRequests
+  /stats/assignmentsPerMember:
+    get:
+      parameters:
+      - description: Количество записей в результате
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: Отступ в статистике
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статистика по назначениям
+          schema:
+            $ref: '#/definitions/docs.AssignmentsStats'
+      summary: Получить статистику назначений пользователей ревьюверами
+      tags:
+      - Stats
+  /team/add:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для создания/обновления
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.AddTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Команда создана
+          schema:
+            $ref: '#/definitions/docs.AddTeamResponse'
+        "400":
+          description: Команда уже существует
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "409":
+          description: Пользователь является членом другой команды
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Создать команду с участниками (создает/обновляет пользователей)
+      tags:
+      - Teams
+  /team/deactivateAll:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Имя команды
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.DeactivateAllRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Участникам установлен статус 'не активен'
+          schema:
+            $ref: '#/definitions/docs.DeactivateAllResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Команда не найдена
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Сделать всех участников в команде неактивными
+      tags:
+      - Teams
+  /team/get:
+    get:
+      parameters:
+      - description: Уникальное имя команды
+        in: query
+        name: team_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Объект команды
+          schema:
+            $ref: '#/definitions/docs.GetTeamResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Команда не найдена
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить команду с участниками
+      tags:
+      - Teams
+  /users/getReview:
+    get:
+      parameters:
+      - description: Идентификатор пользователя
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список PR'ов пользователя
+          schema:
+            $ref: '#/definitions/docs.GetReviewResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить PR'ы, где пользователь установлен ревьювером
+      tags:
+      - Users
+  /users/setIsActive:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для обновления
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.SetIsActiveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленный пользователь
+          schema:
+            $ref: '#/definitions/docs.SetIsActiveResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Установить флаг активности пользователя
+      tags:
+      - Users
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

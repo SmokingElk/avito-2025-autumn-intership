@@ -1,0 +1,55 @@
+services:
+  postgres:
+    container_name: pr-svc_postgres
+    image: postgres:18.0
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    hostname: pr-svc_postgres
+    ports:
+      - 5432:5432
+    networks:
+      - pr-svc_network
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./sql/:/docker-entrypoint-initdb.d/
+      - ./scripts/:/scripts
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  backend-app:
+    container_name: pr-svc_backend-app
+    image: pr-svc_backend-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "http://pr-svc_backend-app:8080/api/v1/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 8080:8080
+    networks:
+      - pr-svc_network
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./config:/root/config:ro
+    env_file:
+      - .env
+
+networks:
+  pr-svc_network:
+    driver: bridge
+
+volumes:
+  postgres-data:

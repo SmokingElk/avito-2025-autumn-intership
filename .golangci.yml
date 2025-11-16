@@ -1,0 +1,31 @@
+version: "2"
+
+run:
+  timeout: 3m
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  default: standard
+
+  enable:
+    - govet
+    - staticcheck
+    - ineffassign
+    - misspell
+    - errcheck
+    - gocyclo
+
+  exclusions:
+    generated: strict
+    paths:
+      - "^vendor/"
+      - "docs.go"
+      - "^mocks/"
+      - ".*\\.pb\\.go$"
+      - ".*_generated\\.go$"
+      - ".*\\.gen\\.go$"

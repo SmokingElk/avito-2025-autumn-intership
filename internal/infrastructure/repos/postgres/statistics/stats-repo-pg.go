@@ -1,0 +1,53 @@
+package statsrepopg
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+
+	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/statistics/entity"
+	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/statistics/interfaces"
+	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/statistics/dto"
+	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog"
+)
+
+type StatsRepoPg struct {
+	db     *sqlx.DB
+	logger zerolog.Logger
+}
+
+func CreateStatsRepoPg(db *sqlx.DB, log zerolog.Logger) interfaces.StatsRepo {
+	return &StatsRepoPg{
+		db:     db,
+		logger: log,
+	}
+}
+
+func (r *StatsRepoPg) GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
+	query := `
+	SELECT member_id, assignments_count
+	FROM assignments_per_members
+	LIMIT $1
+	OFFSET $2
+	`
+
+	var stats []dto.AssignmentsPerMember
+
+	if err := r.db.SelectContext(ctx, &stats, query, limit, offset); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []entity.AssignmentsPerMember{}, nil
+		}
+
+		return []entity.AssignmentsPerMember{}, fmt.Errorf("failed to get assignments from postgres: %w", err)
+	}
+
+	res := make([]entity.AssignmentsPerMember, 0, len(stats))
+
+	for _, assignmentsPerMember := range stats {
+		res = append(res, assignmentsPerMember.ToAssignmentsPerMemberEntity())
+	}
+
+	return res, nil
+}
