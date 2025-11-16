@@ -53,6 +53,16 @@ definitions:
       pr:
         $ref: '#/definitions/docs.PRResponseObject'
     type: object
+  docs.DeactivateAllRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  docs.DeactivateAllResponse:
+    properties:
+      result:
+        type: string
+    type: object
   docs.ErrorResponse:
     properties:
       error:
@@ -358,6 +368,37 @@ paths:
           schema:
             $ref: '#/definitions/docs.ErrorResponse'
       summary: Создать команду с участниками (создает/обновляет пользователей)
+      tags:
+      - Teams
+  /team/deactivateAll:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Имя команды
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/docs.DeactivateAllRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Участникам установлен статус 'не активен'
+          schema:
+            $ref: '#/definitions/docs.DeactivateAllResponse'
+        "401":
+          description: Нет/неверный админский токен
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Команда не найдена
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Сделать всех участников в команде неактивными
       tags:
       - Teams
   /team/get:

@@ -67,3 +67,15 @@ func (s *TeamService) GetByName(ctx context.Context, name string) (teamEntity.Te
 
 	return team, nil
 }
+
+func (s *TeamService) DeactivateAll(ctx context.Context, name string) error {
+	if err := s.repo.SetActivityForAll(ctx, name, memberEntity.MemberInactive); err != nil {
+		if errors.Is(err, teamErrors.ErrTeamNotFound) {
+			return err
+		}
+
+		return fmt.Errorf("failed to deactivate in repo: %w", err)
+	}
+
+	return nil
+}

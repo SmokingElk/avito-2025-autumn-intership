@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS team_member (
     team_id  VARCHAR(64) REFERENCES team(id) ON DELETE SET NULL
 );
 
+CREATE INDEX IF NOT EXISTS idx_team_id ON team_member(team_id);
+
 CREATE TABLE IF NOT EXISTS pull_request (
     id         VARCHAR(36) PRIMARY KEY,
     pr_name    VARCHAR(128) NOT NULL,

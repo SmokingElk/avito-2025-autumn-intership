@@ -156,6 +156,60 @@ func (h *TeamHandlers) Get(ctx *gin.Context) {
 	log.Info().Msg("successfully created team")
 }
 
+// Add godoc
+// @Summary Сделать всех участников в команде неактивными
+// @Tags Teams
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param input body docs.DeactivateAllRequest true "Имя команды"
+// @Success 200 {object} docs.DeactivateAllResponse "Участникам установлен статус 'не активен'"
+// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
+// @Failure 404 {object} docs.ErrorResponse "Команда не найдена"
+// @Router /team/deactivateAll [post]
+func (h *TeamHandlers) DeactivateAll(ctx *gin.Context) {
+	log := h.localLogger(ctx, "DeactivateAll")
+
+	var request docs.DeactivateAllRequest
+
+	if err := ctx.BindJSON(&request); err != nil {
+		log.Warn().Msg("invalid body")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+			"BAD_REQUEST",
+			"invalid body",
+		))
+		return
+	}
+
+	err := h.teamService.DeactivateAll(ctx.Request.Context(), request.Name)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, teamErrors.ErrTeamNotFound):
+			log.Warn().Msg("team not found")
+			ctx.AbortWithStatusJSON(http.StatusNotFound, docs.NewErrorResponse(
+				"NOT_FOUND",
+				"resource not found",
+			))
+
+		default:
+			log.Error().Err(err).Msg("failed to deactivate members of team")
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, docs.NewErrorResponse(
+				"INTERNAL_SERVER_ERROR",
+				fmt.Sprintf("failed to deactivate members of team: %s", err.Error()),
+			))
+		}
+
+		return
+	}
+
+	resp := docs.DeactivateAllResponse{
+		Result: "ok",
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
 func (h *TeamHandlers) localLogger(ctx *gin.Context, opName string) zerolog.Logger {
 	log := h.logger.With().
 		Str("op", opName).
@@ -173,5 +227,6 @@ func InitTeamHandlers(r *gin.RouterGroup, log zerolog.Logger, teamService interf
 	{
 		group.POST("add", h.Add)
 		group.GET("get", auth.WithAuth(cfg), h.Get)
+		group.POST("deactivateAll", auth.WithAuth(cfg), h.DeactivateAll)
 	}
 }

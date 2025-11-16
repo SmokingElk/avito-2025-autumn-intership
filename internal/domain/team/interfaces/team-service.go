@@ -10,4 +10,5 @@ import (
 type TeamService interface {
 	Upsert(ctx context.Context, name string, membersList []memberEntity.Member) error
 	GetByName(ctx context.Context, name string) (teamEntity.Team, error)
+	DeactivateAll(ctx context.Context, name string) error
 }

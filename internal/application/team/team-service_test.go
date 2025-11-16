@@ -350,3 +350,65 @@ func TestGetByName(t *testing.T) {
 		})
 	}
 }
+
+func TestDeactivateAll(t *testing.T) {
+	type testCase struct {
+		what string
+
+		teamName      string
+		repoError     error
+		expectedError string
+		noError       bool
+	}
+
+	testCases := []testCase{
+		{
+			what: "team not found",
+
+			teamName:      "team1",
+			repoError:     teamErrors.ErrTeamNotFound,
+			expectedError: teamErrors.ErrTeamNotFound.Error(),
+		},
+
+		{
+			what: "failed to deactivate all members in team",
+
+			teamName:      "team1",
+			repoError:     errors.New("db is down"),
+			expectedError: "failed to deactivate in repo: db is down",
+		},
+
+		{
+			what: "failed to deactivate all members in team",
+
+			teamName:  "team1",
+			repoError: nil,
+			noError:   true,
+		},
+	}
+
+	for i, tc := range testCases {
+		t.Run(fmt.Sprintf("Test %d: %s", i, tc.what), func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockTeamRepo := teamMocks.NewMockTeamRepo(ctrl)
+
+			mockTeamRepo.EXPECT().SetActivityForAll(
+				gomock.Any(),
+				tc.teamName,
+				memberEntity.MemberInactive,
+			).Return(tc.repoError)
+
+			service := teamservice.CreateTeamService(mockTeamRepo)
+
+			err := service.DeactivateAll(context.Background(), tc.teamName)
+
+			if tc.noError {
+				assert.NoError(t, err)
+			} else {
+				assert.Equal(t, tc.expectedError, err.Error())
+			}
+		})
+	}
+}

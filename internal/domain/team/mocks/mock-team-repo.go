@@ -8,7 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	entity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/entity"
+	entity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/entity"
+	entity0 "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/entity"
 	interfaces "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/interfaces"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -37,10 +38,10 @@ func (m *MockTeamRepo) EXPECT() *MockTeamRepoMockRecorder {
 }
 
 // GetByName mocks base method.
-func (m *MockTeamRepo) GetByName(ctx context.Context, name string) (entity.Team, error) {
+func (m *MockTeamRepo) GetByName(ctx context.Context, name string) (entity0.Team, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByName", ctx, name)
-	ret0, _ := ret[0].(entity.Team)
+	ret0, _ := ret[0].(entity0.Team)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -51,8 +52,22 @@ func (mr *MockTeamRepoMockRecorder) GetByName(ctx, name interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockTeamRepo)(nil).GetByName), ctx, name)
 }
 
+// SetActivityForAll mocks base method.
+func (m *MockTeamRepo) SetActivityForAll(ctx context.Context, name string, activity entity.MemberActivity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetActivityForAll", ctx, name, activity)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetActivityForAll indicates an expected call of SetActivityForAll.
+func (mr *MockTeamRepoMockRecorder) SetActivityForAll(ctx, name, activity interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetActivityForAll", reflect.TypeOf((*MockTeamRepo)(nil).SetActivityForAll), ctx, name, activity)
+}
+
 // Upsert mocks base method.
-func (m *MockTeamRepo) Upsert(ctx context.Context, team entity.Team, matcher interfaces.TeamMatcher) error {
+func (m *MockTeamRepo) Upsert(ctx context.Context, team entity0.Team, matcher interfaces.TeamMatcher) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Upsert", ctx, team, matcher)
 	ret0, _ := ret[0].(error)
