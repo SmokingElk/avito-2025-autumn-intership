@@ -19,6 +19,7 @@ type RestConfig struct {
 	Port        int    `yaml:"port" env-required:"true"`
 	AllowOrigin string `yaml:"allow_origin" env-required:"true"`
 	AdminToken  string `yaml:"admin_token" env-required:"true" env:"ADMIN_TOKEN"`
+	SkipLogging string `yaml:"skip_logging" env-required:"true"`
 }
 
 type PostgresConfig struct {

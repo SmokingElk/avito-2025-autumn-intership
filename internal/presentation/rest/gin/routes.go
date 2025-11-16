@@ -8,7 +8,9 @@ import (
 	memberhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/member"
 	pullrequesthandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/pull-request"
 	teamhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/handlers/team"
+	healthhandlers "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/health"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/middleware/cors"
+	ginlogger "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/middleware/gin-logger"
 	request_id "github.com/SmokingElk/avito-2025-autumn-intership/internal/presentation/rest/gin/middleware/request-id"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -38,6 +40,9 @@ func InitRoutes(
 	teamService teamInterfaces.TeamService,
 	pullRequestService pullRequestInterfaces.PullRequestService,
 ) {
+	r.Use(ginlogger.SkipLogger(cfg))
+	r.Use(gin.Recovery())
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	api := r.Group("api/v1")
@@ -48,4 +53,5 @@ func InitRoutes(
 	memberhandlers.InitMemberHandlers(api, log, memberService, pullRequestService, cfg)
 	teamhandlers.InitTeamHandlers(api, log, teamService, cfg)
 	pullrequesthandlers.InitPullRequestHandlers(api, log, pullRequestService, cfg)
+	healthhandlers.InitHealthHandlers(api)
 }

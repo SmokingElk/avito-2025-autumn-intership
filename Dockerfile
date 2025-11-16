@@ -12,6 +12,8 @@ RUN go build -o pr-service ./cmd/main.go
 # Stage 2: final
 FROM alpine:latest
 
+RUN apk --no-cache add curl
+
 WORKDIR /root
 
 # copy compiled service from previous stage

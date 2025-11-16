@@ -15,6 +15,25 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/health": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Проверка работоспособности сервиса",
+                "responses": {
+                    "200": {
+                        "description": "Service healthy",
+                        "schema": {
+                            "$ref": "#/definitions/docs.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/pullRequest/create": {
             "post": {
                 "security": [
@@ -474,6 +493,17 @@ const docTemplate = `{
                     }
                 },
                 "team_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
