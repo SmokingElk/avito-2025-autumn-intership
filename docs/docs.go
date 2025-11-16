@@ -457,7 +457,7 @@ const docTemplate = `{
         "docs.AssignmentsPerMember": {
             "type": "object",
             "properties": {
-                "assigments_count": {
+                "assignments_count": {
                     "type": "integer"
                 },
                 "member_id": {
@@ -714,7 +714,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{"http", "https"},
 	Title:            "PR Reviewer Assignment Service (Test Task, Fall 2025)",
-	Description:      "API for pull requests managment in teams",
+	Description:      "API for pull requests management in teams",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

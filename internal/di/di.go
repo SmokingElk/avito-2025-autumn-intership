@@ -23,10 +23,10 @@ func MustConfigureApp(r *gin.Engine, cfg *config.Config, log zerolog.Logger) fun
 		log.Fatal().Err(err).Msg("failed to connect to postgres")
 	}
 
-	memberRepo := memberrepopg.CreateMemberRepoPg(conn)
-	teamRepo := teamrepopg.CreateTeamRepoPg(conn)
-	pullRequestRepo := pullrequestrepopg.CreatePullRequestRepoPg(conn)
-	statsRepo := statsrepopg.CreateStatsRepoPg(conn)
+	memberRepo := memberrepopg.CreateMemberRepoPg(conn, log)
+	teamRepo := teamrepopg.CreateTeamRepoPg(conn, log)
+	pullRequestRepo := pullrequestrepopg.CreatePullRequestRepoPg(conn, log)
+	statsRepo := statsrepopg.CreateStatsRepoPg(conn, log)
 
 	memberService := memberservice.CreateMemberService(memberRepo)
 	teamService := teamservice.CreateTeamService(teamRepo)
@@ -36,6 +36,8 @@ func MustConfigureApp(r *gin.Engine, cfg *config.Config, log zerolog.Logger) fun
 	rest.InitRoutes(r, &cfg.RestConfig, log, memberService, teamService, pullrequestservice, statsService)
 
 	return func() {
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close postgres connection")
+		}
 	}
 }

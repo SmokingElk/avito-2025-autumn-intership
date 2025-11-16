@@ -11,15 +11,18 @@ import (
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/interfaces"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/member/dto"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog"
 )
 
 type MemberRepoPg struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger zerolog.Logger
 }
 
-func CreateMemberRepoPg(db *sqlx.DB) interfaces.MemberRepo {
+func CreateMemberRepoPg(db *sqlx.DB, log zerolog.Logger) interfaces.MemberRepo {
 	return &MemberRepoPg{
-		db: db,
+		db:     db,
+		logger: log,
 	}
 }
 
@@ -36,7 +39,9 @@ func (r *MemberRepoPg) SetActivity(
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				r.logger.Error().Err(err).Msg("failed to rollback transaction")
+			}
 		}
 	}()
 

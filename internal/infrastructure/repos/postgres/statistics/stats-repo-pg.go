@@ -10,21 +10,24 @@ import (
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/statistics/interfaces"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/statistics/dto"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog"
 )
 
 type StatsRepoPg struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger zerolog.Logger
 }
 
-func CreateStatsRepoPg(db *sqlx.DB) interfaces.StatsRepo {
+func CreateStatsRepoPg(db *sqlx.DB, log zerolog.Logger) interfaces.StatsRepo {
 	return &StatsRepoPg{
-		db: db,
+		db:     db,
+		logger: log,
 	}
 }
 
 func (r *StatsRepoPg) GetAssignmentsPerMember(ctx context.Context, limit, offset int) ([]entity.AssignmentsPerMember, error) {
 	query := `
-	SELECT member_id, assigments_count
+	SELECT member_id, assignments_count
 	FROM assignments_per_members
 	LIMIT $1
 	OFFSET $2
@@ -37,7 +40,7 @@ func (r *StatsRepoPg) GetAssignmentsPerMember(ctx context.Context, limit, offset
 			return []entity.AssignmentsPerMember{}, nil
 		}
 
-		return []entity.AssignmentsPerMember{}, fmt.Errorf("failed to get assigments from postgres: %w", err)
+		return []entity.AssignmentsPerMember{}, fmt.Errorf("failed to get assignments from postgres: %w", err)
 	}
 
 	res := make([]entity.AssignmentsPerMember, 0, len(stats))

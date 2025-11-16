@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetAssigmentsPerMember(t *testing.T) {
+func TestGetAssignmentsPerMember(t *testing.T) {
 	type testCase struct {
 		what string
 

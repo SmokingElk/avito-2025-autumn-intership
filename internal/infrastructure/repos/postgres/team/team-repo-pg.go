@@ -11,15 +11,18 @@ import (
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/interfaces"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/infrastructure/repos/postgres/team/dto"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog"
 )
 
 type TeamRepoPg struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger zerolog.Logger
 }
 
-func CreateTeamRepoPg(db *sqlx.DB) interfaces.TeamRepo {
+func CreateTeamRepoPg(db *sqlx.DB, log zerolog.Logger) interfaces.TeamRepo {
 	return &TeamRepoPg{
-		db: db,
+		db:     db,
+		logger: log,
 	}
 }
 
@@ -32,7 +35,9 @@ func (r *TeamRepoPg) Upsert(ctx context.Context, team teamEntity.Team, matcher i
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				r.logger.Error().Err(err).Msg("failed to rollback transaction")
+			}
 		}
 	}()
 
@@ -145,7 +150,9 @@ func (r *TeamRepoPg) GetByName(ctx context.Context, name string) (teamEntity.Tea
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				r.logger.Error().Err(err).Msg("failed to rollback transaction")
+			}
 		}
 	}()
 

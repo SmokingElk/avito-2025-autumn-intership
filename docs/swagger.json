@@ -5,7 +5,7 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "API for pull requests managment in teams",
+        "description": "API for pull requests management in teams",
         "title": "PR Reviewer Assignment Service (Test Task, Fall 2025)",
         "contact": {},
         "version": "1.0.0"
@@ -455,7 +455,7 @@
         "docs.AssignmentsPerMember": {
             "type": "object",
             "properties": {
-                "assigments_count": {
+                "assignments_count": {
                     "type": "integer"
                 },
                 "member_id": {
