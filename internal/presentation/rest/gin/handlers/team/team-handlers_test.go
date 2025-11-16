@@ -329,3 +329,99 @@ func TestGet(t *testing.T) {
 		})
 	}
 }
+
+func TestDeactivateAll(t *testing.T) {
+	log := logger.NewTest()
+
+	type testCase struct {
+		what string
+
+		body         string
+		teamName     string
+		repoError    error
+		expectedCode int
+		expectedBody string
+	}
+
+	testCases := []testCase{
+		{
+			what: "invalid body",
+
+			body: `{
+				"name": "team1"
+			`,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid body"}}`,
+		},
+
+		{
+			what: "invalid body",
+
+			body: `{
+				"name": "team1"
+			}`,
+			teamName:     "team1",
+			repoError:    teamErrors.ErrTeamNotFound,
+			expectedCode: http.StatusNotFound,
+			expectedBody: `{"error":{"code":"NOT_FOUND","message":"resource not found"}}`,
+		},
+
+		{
+			what: "failed to deactivate members of team",
+
+			body: `{
+				"name": "team1"
+			}`,
+			teamName:     "team1",
+			repoError:    errors.New("db is down"),
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to deactivate members of team: ` +
+				`failed to deactivate in repo: db is down"}}`,
+		},
+
+		{
+			what: "failed to deactivate members of team",
+
+			body: `{
+				"name": "team1"
+			}`,
+			teamName:     "team1",
+			repoError:    nil,
+			expectedCode: http.StatusOK,
+			expectedBody: `{"result":"ok"}`,
+		},
+	}
+
+	for i, tc := range testCases {
+		t.Run(fmt.Sprintf("Test %d: %s", i, tc.what), func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			teamRepo := teamMocks.NewMockTeamRepo(ctrl)
+
+			teamRepo.EXPECT().SetActivityForAll(
+				gomock.Any(),
+				tc.teamName,
+				memberEntity.MemberInactive,
+			).Return(tc.repoError).MaxTimes(1)
+
+			teamService := teamservice.CreateTeamService(teamRepo)
+
+			handlers := teamhandlers.CreateTeamHandlers(teamService, log)
+
+			gin.SetMode(gin.TestMode)
+			router := gin.New()
+			router.POST("/", handlers.DeactivateAll)
+
+			body := bytes.NewBufferString(tc.body)
+			req := httptest.NewRequest("POST", "/", body)
+
+			recorder := httptest.NewRecorder()
+
+			router.ServeHTTP(recorder, req)
+
+			assert.Equal(t, tc.expectedCode, recorder.Code)
+			assert.Equal(t, tc.expectedBody, recorder.Body.String())
+		})
+	}
+}

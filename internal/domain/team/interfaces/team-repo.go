@@ -3,6 +3,7 @@ package interfaces
 import (
 	"context"
 
+	memberEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/entity"
 	teamEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/entity"
 )
 
@@ -12,4 +13,5 @@ type TeamMatcher func(currentTeam teamEntity.Team) bool
 type TeamRepo interface {
 	Upsert(ctx context.Context, team teamEntity.Team, matcher TeamMatcher) error
 	GetByName(ctx context.Context, name string) (teamEntity.Team, error)
+	SetActivityForAll(ctx context.Context, name string, activity memberEntity.MemberActivity) error
 }

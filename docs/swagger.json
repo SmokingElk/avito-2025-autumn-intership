@@ -280,6 +280,56 @@
                 }
             }
         },
+        "/team/deactivateAll": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Сделать всех участников в команде неактивными",
+                "parameters": [
+                    {
+                        "description": "Имя команды",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/docs.DeactivateAllRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Участникам установлен статус 'не активен'",
+                        "schema": {
+                            "$ref": "#/definitions/docs.DeactivateAllResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет/неверный админский токен",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Команда не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/team/get": {
             "get": {
                 "security": [
@@ -496,6 +546,22 @@
             "properties": {
                 "pr": {
                     "$ref": "#/definitions/docs.PRResponseObject"
+                }
+            }
+        },
+        "docs.DeactivateAllRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.DeactivateAllResponse": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "string"
                 }
             }
         },

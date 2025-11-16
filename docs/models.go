@@ -180,3 +180,11 @@ type AssignmentsStats struct {
 	Count   int                    `json:"count"`
 	Results []AssignmentsPerMember `json:"results"`
 }
+
+type DeactivateAllRequest struct {
+	Name string `json:"name"`
+}
+
+type DeactivateAllResponse struct {
+	Result string `json:"result"`
+}

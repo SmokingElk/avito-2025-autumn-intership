@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	memberEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/member/entity"
 	teamEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/entity"
 	teamErrors "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/errors"
 	"github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/team/interfaces"
@@ -167,6 +168,31 @@ func (r *TeamRepoPg) GetByName(ctx context.Context, name string) (teamEntity.Tea
 	}
 
 	return res, nil
+}
+
+func (r *TeamRepoPg) SetActivityForAll(ctx context.Context, name string, activity memberEntity.MemberActivity) error {
+	query := `
+	UPDATE team_member 
+	SET activity = $1
+	WHERE team_id = (
+		SELECT id FROM team WHERE team_name = $2
+	)
+	RETURNING team_id
+	`
+
+	var resp struct {
+		Id string `db:"team_id"`
+	}
+
+	if err := r.db.GetContext(ctx, &resp, query, string(activity), name); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return teamErrors.ErrTeamNotFound
+		}
+
+		return fmt.Errorf("failed to set activity for all members of team in postgres: %w", err)
+	}
+
+	return nil
 }
 
 func (r *TeamRepoPg) getTeamWithMembers(ctx context.Context, tx *sqlx.Tx, name string) (teamEntity.Team, error) {
