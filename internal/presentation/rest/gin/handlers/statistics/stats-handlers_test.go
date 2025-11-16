@@ -37,7 +37,7 @@ func TestGetAssignmentsPerMember(t *testing.T) {
 			limitParam:   "",
 			offsetParam:  "1",
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid limit param"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid limit param"}}`,
 		},
 
 		{
@@ -46,7 +46,7 @@ func TestGetAssignmentsPerMember(t *testing.T) {
 			limitParam:   "1",
 			offsetParam:  "",
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid offset param"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid offset param"}}`,
 		},
 
 		{
@@ -58,8 +58,8 @@ func TestGetAssignmentsPerMember(t *testing.T) {
 			offset:       5,
 			repoError:    errors.New("db is down"),
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to get assignmnets per member: ` +
-				`failed to get assignments stats from repo: db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to get assignmnets per member: ` +
+				`failed to get assignments stats from repo: db is down"}}`,
 		},
 
 		{

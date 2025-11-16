@@ -49,7 +49,7 @@ func TestSetIsActive(t *testing.T) {
 
 			body:         "{",
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid body"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid body"}}`,
 		},
 
 		{
@@ -63,7 +63,7 @@ func TestSetIsActive(t *testing.T) {
 			expectedActivity: memberEntity.MemberInactive,
 			repoError:        memberErrors.ErrMemberNotFound,
 			expectedCode:     http.StatusNotFound,
-			expectedBody:     `{"code":"NOT_FOUND","message":"resource not found"}`,
+			expectedBody:     `{"error":{"code":"NOT_FOUND","message":"resource not found"}}`,
 		},
 
 		{
@@ -77,8 +77,8 @@ func TestSetIsActive(t *testing.T) {
 			expectedActivity: memberEntity.MemberInactive,
 			repoError:        errors.New("db is down"),
 			expectedCode:     http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to set is active: failed to set active in ` +
-				`repo: db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to set is active: ` +
+				`failed to set active in repo: db is down"}}`,
 		},
 
 		{
@@ -183,7 +183,7 @@ func TestGetReview(t *testing.T) {
 
 			userId:       "",
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid user_id param"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid user_id param"}}`,
 		},
 
 		{
@@ -192,8 +192,8 @@ func TestGetReview(t *testing.T) {
 			userId:       "u1",
 			repoError:    errors.New("db is down"),
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to get pr's by user id: ` +
-				`failed to get pull requests from repo: db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to get pr's by user id: ` +
+				`failed to get pull requests from repo: db is down"}}`,
 		},
 
 		{

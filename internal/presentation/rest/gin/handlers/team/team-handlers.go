@@ -36,7 +36,6 @@ func CreateTeamHandlers(teamService interfaces.TeamService, log zerolog.Logger) 
 // @Param input body docs.AddTeamRequest true "Данные для создания/обновления"
 // @Success 201 {object} docs.AddTeamResponse "Команда создана"
 // @Failure 400 {object} docs.ErrorResponse "Команда уже существует"
-// @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 409 {object} docs.ErrorResponse "Пользователь является членом другой команды"
 // @Router /team/add [post]
 func (h *TeamHandlers) Add(ctx *gin.Context) {

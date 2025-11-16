@@ -168,6 +168,7 @@ func (h *PullRequestHandlers) Merge(ctx *gin.Context) {
 // @Produce json
 // @Param input body docs.ReassignRequest true "Данные для переназначения"
 // @Success 200 {object} docs.ReassignResponse "Переназначение выполнено"
+// @Failure 400 {object} docs.ErrorResponse "Не достаточно активных членов для переназначения"
 // @Failure 401 {object} docs.ErrorResponse "Нет/неверный админский токен"
 // @Failure 404 {object} docs.ErrorResponse "PR или пользователь найден"
 // @Failure 409 {object} docs.ErrorResponse "Нарушение доменных правил переназначения"
@@ -190,6 +191,13 @@ func (h *PullRequestHandlers) Reassign(ctx *gin.Context) {
 
 	if err != nil {
 		switch {
+		case errors.Is(err, prErrors.ErrCannotReassign):
+			log.Warn().Msg("cannot reassign")
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, docs.NewErrorResponse(
+				"CANNOT_REASSIGN",
+				"no member to reassign",
+			))
+
 		case errors.Is(err, prErrors.ErrNotFound):
 			log.Warn().Msg("pr not found")
 			ctx.AbortWithStatusJSON(http.StatusNotFound, docs.NewErrorResponse(
@@ -206,11 +214,9 @@ func (h *PullRequestHandlers) Reassign(ctx *gin.Context) {
 
 		case errors.Is(err, prErrors.ErrAlreadyMerged):
 			log.Warn().Msg("pr already merged")
-			// suggest it must be the other code here
-			// did according to given openapi
 			ctx.AbortWithStatusJSON(http.StatusConflict, docs.NewErrorResponse(
-				"NOT_FOUND",
-				"resource not found",
+				"PR_MERGED",
+				"cannot reassign on merged PR",
 			))
 
 		default:

@@ -8,15 +8,21 @@ import (
 	statsEntity "github.com/SmokingElk/avito-2025-autumn-intership/internal/domain/statistics/entity"
 )
 
-type ErrorResponse struct {
+type ErrorResponseObject struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
+type ErrorResponse struct {
+	Error ErrorResponseObject `json:"error"`
+}
+
 func NewErrorResponse(code, message string) ErrorResponse {
 	return ErrorResponse{
-		Code:    code,
-		Message: message,
+		Error: ErrorResponseObject{
+			Code:    code,
+			Message: message,
+		},
 	}
 }
 

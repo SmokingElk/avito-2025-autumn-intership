@@ -39,7 +39,7 @@ func TestAdd(t *testing.T) {
 
 			body:         "{",
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid body"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid body"}}`,
 		},
 
 		{
@@ -77,7 +77,7 @@ func TestAdd(t *testing.T) {
 			},
 			repoError:    teamErrors.ErrTeamExists,
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"TEAM_EXISTS","message":"team_name already exists"}`,
+			expectedBody: `{"error":{"code":"TEAM_EXISTS","message":"team_name already exists"}}`,
 		},
 
 		{
@@ -115,7 +115,7 @@ func TestAdd(t *testing.T) {
 			},
 			repoError:    teamErrors.ErrMemberOfOtherTeam,
 			expectedCode: http.StatusConflict,
-			expectedBody: `{"code":"MEMBER_OF_OTHER_TEAM","message":"User is member of other team"}`,
+			expectedBody: `{"error":{"code":"MEMBER_OF_OTHER_TEAM","message":"User is member of other team"}}`,
 		},
 
 		{
@@ -153,12 +153,12 @@ func TestAdd(t *testing.T) {
 			},
 			repoError:    errors.New("db is down"),
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to create team: ` +
-				`failed to upsert team to repo: db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to create team: ` +
+				`failed to upsert team to repo: db is down"}}`,
 		},
 
 		{
-			what: "failed to create team",
+			what: "successfully created team",
 
 			body: `{
 				"members": [
@@ -250,7 +250,7 @@ func TestGet(t *testing.T) {
 
 			teamName:     "",
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"code":"BAD_REQUEST","message":"invalid team_name param"}`,
+			expectedBody: `{"error":{"code":"BAD_REQUEST","message":"invalid team_name param"}}`,
 		},
 
 		{
@@ -259,7 +259,7 @@ func TestGet(t *testing.T) {
 			teamName:     "team1",
 			repoError:    teamErrors.ErrTeamNotFound,
 			expectedCode: http.StatusNotFound,
-			expectedBody: `{"code":"NOT_FOUND","message":"resource not found"}`,
+			expectedBody: `{"error":{"code":"NOT_FOUND","message":"resource not found"}}`,
 		},
 
 		{
@@ -268,8 +268,8 @@ func TestGet(t *testing.T) {
 			teamName:     "team1",
 			repoError:    errors.New("db is down"),
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"code":"INTERNAL_SERVER_ERROR","message":"failed to get team: ` +
-				`failed to get team from repo: db is down"}`,
+			expectedBody: `{"error":{"code":"INTERNAL_SERVER_ERROR","message":"failed to get team: ` +
+				`failed to get team from repo: db is down"}}`,
 		},
 
 		{
