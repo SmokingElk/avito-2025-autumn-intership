@@ -48,11 +48,17 @@ func (s *PullRequestService) Create(ctx context.Context, prId, prName, authorId 
 			}
 		}
 
-		rand.Shuffle(len(activeMembers), func(i, j int) {
-			activeMembers[i], activeMembers[j] = activeMembers[j], activeMembers[i]
-		})
+		resultLen := min(s.cfg.TargetReviewersCount, len(activeMembers))
 
-		return activeMembers[:min(s.cfg.TargetReviewersCount, len(activeMembers))]
+		if len(activeMembers) > resultLen {
+			// get resultLen random activeMembers with O(resultLen) complexity
+			for i := range resultLen {
+				index := rand.Intn(len(activeMembers)-i) + i
+				activeMembers[i], activeMembers[index] = activeMembers[index], activeMembers[i]
+			}
+		}
+
+		return activeMembers[:resultLen]
 	})
 
 	if err != nil {
