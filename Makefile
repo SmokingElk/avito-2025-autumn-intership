@@ -50,3 +50,7 @@ cover:
 	go test -coverprofile=cover.out -count=1 ./...
 	go tool cover -html=cover.out
 	DEL cover.out
+
+.PHONY: load_test_data
+load_test_data:
+	docker exec -i pr-svc_postgres psql -U Admin -d pr-service -f /scripts/fill-with-test-data.sql

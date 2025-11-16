@@ -34,18 +34,3 @@ CREATE TABLE IF NOT EXISTS assigned_reviewer (
 
     PRIMARY KEY (member_id, pr_id)
 );
-
-CREATE VIEW pr_with_members AS 
-SELECT
-    pr.id,
-    pr.pr_name,
-    pr.author_id,
-    pr.pr_status,
-    pr.created_at,
-    pr.merged_at,
-    pr.team_id,
-    ARRAY_AGG(a.member_id) FILTER (WHERE a.member_id IS NOT NULL) AS reviewers
-FROM pull_request AS pr
-LEFT JOIN assigned_reviewer AS a
-    ON pr.id = a.pr_id
-GROUP BY pr.id;
