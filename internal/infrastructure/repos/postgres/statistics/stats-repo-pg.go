@@ -27,7 +27,7 @@ func (r *StatsRepoPg) GetAssigmentsPerMember(ctx context.Context, limit, offset 
 	SELECT member_id, COUNT(*) AS assigments_count
 	FROM assigned_reviewer
 	GROUP BY member_id
-	ORDER BY assigments_count
+	ORDER BY assigments_count DESC
 	LIMIT $1
 	OFFSET $2
 	`
